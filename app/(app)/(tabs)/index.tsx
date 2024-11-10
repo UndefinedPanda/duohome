@@ -1,4 +1,4 @@
-import { StyleSheet, View, } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button, ButtonText } from '@/components/ui/button'
 import { useSession } from '@/app/AuthContext'
@@ -20,21 +20,26 @@ const TODAYS_DATE = CalendarUtils.getCalendarDateString(new Date());
 const CARD_SIZE = 'lg';
 
 export default function HomeScreen() {
-    const getDate = (count: number) => {
-        const date = new Date(TODAYS_DATE);
-        const newDate = date.setDate(date.getDate() + count);
-        return CalendarUtils.getCalendarDateString(newDate);
-    };
+    // const getDate = (count: number) => {
+    //     const date = new Date(TODAYS_DATE);
+    //     const newDate = date.setDate(date.getDate() + count);
+    //     return CalendarUtils.getCalendarDateString(newDate);
+    // };
+
+    const {session} = useSession();
+
+    const userSession = session ? JSON.parse(session) : undefined;
+    console.log(userSession)
 
     const openCreateFamilyScreen = () => {
         router.push('/CreateFamilyScreen')
     }
 
-    const { logOut } = useSession();
+    const {logOut} = useSession();
 
     return (
-        <ThemedView style={styles.mainContainer}>
-            <View style={styles.calendarContainer} >
+        <ThemedView style={ styles.mainContainer }>
+            <View style={ styles.calendarContainer }>
                 {/* <Calendar
                     style={styles.calendar}
                     minDate={getDate(-14)}
@@ -63,18 +68,18 @@ export default function HomeScreen() {
                         selectedDayTextColor: '#ffffff',
                     }}
                     onDayPress={(day: { dateString: any; }) => console.warn('day pressed')}
-                /> */}
+                /> */ }
             </View>
-            <Grid style={styles.cardsContainer} _extra={{
+            <Grid style={ styles.cardsContainer } _extra={ {
                 className: 'grid-cols-8'
-            }}>
-                <GridItem _extra={{
+            } }>
+                <GridItem _extra={ {
                     className: 'col-span-8'
-                }}>
-                    <Card style={styles.card} size={CARD_SIZE} variant="elevated" className="m-3 rounded-none ">
-                        <HStack space='2xl'>
-                            <VStack style={styles.eventVStack}>
-                                <Heading style={styles.heading} size="lg" className="mb-1">
+                } }>
+                    <Card style={ styles.card } size={ CARD_SIZE } variant="elevated" className="m-3 rounded-none ">
+                        <HStack space="2xl">
+                            <VStack style={ styles.eventVStack }>
+                                <Heading style={ styles.heading } size="lg" className="mb-1">
                                     Today's Event
                                 </Heading>
                                 <Text size="md">Dentist Appointment</Text>
@@ -82,7 +87,7 @@ export default function HomeScreen() {
                                 <Text size="md">For: Alex</Text>
                             </VStack>
                             <VStack>
-                                <Heading style={styles.heading} size="lg" className="mb-1">
+                                <Heading style={ styles.heading } size="lg" className="mb-1">
                                     Notifications
                                 </Heading>
                                 <Text size="md">2 Unread Messages</Text>
@@ -102,7 +107,7 @@ export default function HomeScreen() {
                             </Heading>
                             <Text size="sm">You have 4 Unread Messages</Text>
                         </Card>
-                    </GridItem> */}
+                    </GridItem> */ }
 
                 {/* <GridItem _extra={{
                         className: 'col-span-4'
@@ -113,26 +118,34 @@ export default function HomeScreen() {
                             </Heading>
                             <Text size="sm">1 new document</Text>
                         </Card>
-                    </GridItem> */}
-                <GridItem _extra={{
+                    </GridItem> */ }
+                <GridItem _extra={ {
                     className: 'col-span-8'
-                }}>
-                    <Card style={styles.card} size={CARD_SIZE} variant="elevated" className="m-3 rounded-none ">
-                        <Heading style={styles.heading} size="lg" className="mb-1">
+                } }>
+                    <Card style={ styles.card } size={ CARD_SIZE } variant="elevated" className="m-3 rounded-none ">
+                        <Heading style={ styles.heading } size="lg" className="mb-1">
                             Quick Actions
                         </Heading>
-                        <HStack space='2xl'>
-                            <VStack style={styles.eventVStack}>
+                        <HStack space="2xl">
+                            <VStack style={ styles.eventVStack }>
                                 <Text size="md">Create Event</Text>
                                 <Text size="md">Message Co-Parent</Text>
                                 <Text size="md">Scan Document</Text>
                                 <Text size="md">Upload Image</Text>
                             </VStack>
                             <VStack>
-                                <Button className="mt-4 bg-primary-500" size="xl" onPress={openCreateFamilyScreen}>
-                                    <ButtonText>Create Family</ButtonText>
-                                </Button>
-                                <Button className="mt-4 bg-primary-500" size="xl" onPress={logOut}>
+                                { userSession?.familyId ?
+                                    <Button className="mt-4 bg-primary-500" size="xl"
+                                            onPress={ openCreateFamilyScreen }>
+                                        <ButtonText>View Family</ButtonText>
+                                    </Button>
+                                    :
+                                    <Button className="mt-4 bg-primary-500" size="xl"
+                                            onPress={ openCreateFamilyScreen }>
+                                        <ButtonText>Create Family</ButtonText>
+                                    </Button>
+                                }
+                                <Button className="mt-4 bg-primary-500" size="xl" onPress={ logOut }>
                                     <ButtonText>Logout</ButtonText>
                                 </Button>
                                 <Text size="md">1 Appointment Change Request</Text>
@@ -150,7 +163,8 @@ export default function HomeScreen() {
                 logOut();
             }}>
                 <ButtonText>Log Out</ButtonText>
-            </Button> */}
+            </Button> */
+}
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -161,12 +175,12 @@ const styles = StyleSheet.create({
     calendarContainer: {
         paddingLeft: 10,
         paddingRight: 10,
-        width: '100%',
+        width: '100%'
     },
     cardsContainer: {
         width: '100%',
         height: '100%',
-        marginTop: 20,
+        marginTop: 20
     },
     cardsStack: {
         width: '100%'
@@ -175,14 +189,14 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         shadowColor: '#000',
         shadowOpacity: 0.25,
-        shadowOffset: { width: 0, height: 0 },
-        shadowRadius: 3,
+        shadowOffset: {width: 0, height: 0},
+        shadowRadius: 3
     },
     eventVStack: {
-        marginRight: 40,
+        marginRight: 40
     },
     heading: {
-        color: Colors.light.green,
+        color: Colors.light.green
     },
     text: {
         textAlign: 'center',
@@ -204,8 +218,8 @@ const styles = StyleSheet.create({
         color: Colors.light.text,
         shadowColor: '#000',
         shadowOpacity: 0.25,
-        shadowOffset: { width: 0, height: 0 },
-        shadowRadius: 5,
+        shadowOffset: {width: 0, height: 0},
+        shadowRadius: 5
     }
     // customCalendar: {
     //     height: 250,

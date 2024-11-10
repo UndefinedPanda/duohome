@@ -4,6 +4,7 @@ import { useColorScheme } from '@/hooks/useColorScheme'
 import { SessionProvider, useSession } from '../AuthContext'
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
+import { Colors } from '@/constants/Colors';
 
 export default function AppLayout() {
     const {session, isLoading} = useSession()
@@ -28,8 +29,16 @@ export default function AppLayout() {
         <GluestackUIProvider mode="light">
             <SessionProvider>
                 <Stack>
-                    <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
-                    <Stack.Screen name="CreateFamilyScreen" options={{headerShown: false}}/>
+                    <Stack.Screen name="(tabs)" options={{
+                        headerShown: false, headerTitle: 'Home'
+                    }}/>
+                    <Stack.Screen name="CreateFamilyScreen" options={{
+                        headerShown: true,
+                        headerTitle: 'Create Your Family',
+                        headerStyle: {
+                            backgroundColor: Colors.light.beige
+                        }
+                    }}/>
                 </Stack>
             </SessionProvider>
         </GluestackUIProvider>

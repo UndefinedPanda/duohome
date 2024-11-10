@@ -3,16 +3,32 @@ import { useStorageState } from './UseStorageState';
 import { router } from 'expo-router'
 import { supabase } from '@/lib/Supabase';
 
-interface RegisterError {
+// TODO: CLEAN UP THIS FILE -
+// TODO: CREATE ERROR TYPE AND RETURN THAT INSTEAD OF SHIT
+// TODO: REMOVE ALL FUNCTIONALITY FROM THE AUTH CONTEXT REGISTER AND LOGIN FUNCTIONS TO THEIR OWN SEPARATE METHOD FUNCTIONS
+
+type RegisterError = {
     error: boolean;
     message: string;
+}
+
+type UserPreferences = {}
+
+export type UserSession = {
+    userId: string;
+    familyId?: number | undefined | null;
+    firstName: string | undefined | null;
+    lastName?: string | undefined | null;
+    premiumUser?: boolean | undefined | null;
+    premiumFamily?: boolean | undefined | null;
+    userPreferences?: UserPreferences | undefined | null;
 }
 
 const AuthContext = createContext<{
     register: (email: string, firstName: string, lastName: string, password: string) => any;
     login: (email: string, password: string) => any;
     logOut: () => void;
-    session?: string | null;
+    session?: string | undefined | null;
     isLoading: boolean;
 }>({
     register: async (email: string, firstName: string, lastName: string, password: string) => null,
@@ -34,32 +50,81 @@ export function useSession() {
     return value;
 }
 
-const registerUser = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-        console.log(error.message);
-        return { registered: false, errorMessage: error.message };
-    }
-    return { registered: true, errorMessage: '' };
-}
+export function SessionProvider({children}: PropsWithChildren) {
 
-const loginUser = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-        console.log(error.message);
-        return { loggedIn: false, errorMessage: error.message };
-    }
-    return { data, loggedIn: true, errorMessage: '' };
-}
-
-export function SessionProvider({ children }: PropsWithChildren) {
     const [[isLoading, session], setSession] = useStorageState('session');
+
+    const registerUser = async (email: string, password: string, firstName: string) => {
+        const {error} = await supabase.auth.signUp({
+            email, password, options: {
+                data: {
+                    first_name: firstName
+                }
+            }
+        });
+
+        if (error) {
+            console.log(error.message);
+            return {registered: false, errorMessage: error.message};
+        }
+
+        return {registered: true, errorMessage: ''};
+    }
+
+    const loginUser = async (email: string, password: string) => {
+        const {data: {user}, error} = await supabase.auth.signInWithPassword({email, password});
+        if (error) {
+            console.log(error.message);
+            return {loggedIn: false, errorMessage: error.message};
+        }
+
+        const userInformation = await getUserInformation(user);
+
+        if (userInformation.error) {
+            console.log(userInformation.errorMessage);
+            return {loggedIn: false, errorMessage: userInformation.errorMessage};
+        }
+
+        return {user, loggedIn: true, errorMessage: ''};
+    }
+
+    const getUserInformation = async (user: any) => {
+
+        // get family
+        const {
+            data: family_parent,
+            error
+        } = await supabase.from('family_parent').select('*').eq('parent_id', user.id).limit(1).single();
+
+        if (error) {
+            return {
+                error: true,
+                errorMessage: error.message
+            }
+        }
+
+        // TODO: Get User Preferences
+
+        // Create the session
+        const userSession: UserSession = {
+            userId: user.id,
+            firstName: user.user_metadata.first_name,
+            familyId: family_parent.family_id
+        }
+
+        const sessionString = JSON.stringify(userSession);
+        setSession(sessionString);
+        return {
+            error: false,
+            errorMessage: ''
+        }
+    }
 
     return (
         <AuthContext.Provider
-            value={{
+            value={ {
                 register: async (email, firstName, lastName, password) => {
-                    const { registered, errorMessage } = await registerUser(email, password);
+                    const {registered, errorMessage} = await registerUser(email, password, firstName);
 
                     if (!registered) {
                         return {
@@ -68,9 +133,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
                         }
                     }
 
-                    const { data, error } = await supabase.from('parents').insert([{
+                    const {data, error} = await supabase.from('parents').insert([{
                         email, first_name: firstName, last_name: lastName
-                    }]).select();
+                    }]).select().limit(1).single();
 
                     if (error) {
                         return {
@@ -78,18 +143,30 @@ export function SessionProvider({ children }: PropsWithChildren) {
                             errorMessage: error.message
                         }
                     }
-                    setSession(data[0].id)
+
+                    // Create the session
+                    const userSession: UserSession = {
+                        userId: data.id,
+                        firstName
+                    }
+
+                    const sessionString = JSON.stringify(userSession);
+                    setSession(sessionString);
+
                     return {
                         registered: true,
                         errorMessage: ''
                     }
                 },
                 login: async (email: string, password: string) => {
-                    const { data, loggedIn, errorMessage } = await loginUser(email, password);
-                    if (!loggedIn) return { loggedIn, errorMessage }
-                    if (!data) return { loggedIn: false, errorMessage: 'There was an error logging you in. Try again later.' }
-                    setSession(data.user.id)
-                    return { loggedIn, errorMessage: '' }
+                    const {user, loggedIn, errorMessage} = await loginUser(email, password);
+                    if (!loggedIn) return {loggedIn, errorMessage}
+                    if (!user) return {
+                        loggedIn: false,
+                        errorMessage: 'There was an error logging you in. Try again later.'
+                    }
+
+                    return {loggedIn, errorMessage: ''}
                 },
                 logOut: () => {
                     setSession(null);
@@ -97,8 +174,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
                 },
                 session,
                 isLoading
-            }}>
-            {children}
+            } }>
+            { children }
         </AuthContext.Provider>
     );
 }

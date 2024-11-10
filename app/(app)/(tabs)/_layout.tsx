@@ -5,19 +5,21 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { UserSession, useSession } from '@/app/AuthContext';
 
 export default function TabLayout() {
-    const colorScheme = useColorScheme();
+    const {session} = useSession();
+    const userSession: UserSession = session ? JSON.parse(session) : undefined;
 
     return (
         <GluestackUIProvider>
             <Tabs
-                sceneContainerStyle={{ backgroundColor: Colors.light.background }}
-                screenOptions={{
+                sceneContainerStyle={ {backgroundColor: Colors.light.background} }
+                screenOptions={ {
                     tabBarStyle: {
                         backgroundColor: '#eae0c9',
                         shadowColor: '#000',
-                        shadowOpacity: 0.25,
+                        shadowOpacity: 0.25
                     },
                     tabBarActiveTintColor: Colors.light.green,
                     headerShown: true,
@@ -25,37 +27,37 @@ export default function TabLayout() {
                         backgroundColor: Colors.light.beige,
                         shadowColor: '#000',
                         shadowOpacity: 0.25,
-                        shadowRadius: 3,
+                        shadowRadius: 3
                     }
-                }}>
+                } }>
                 <Tabs.Screen
                     name="index"
-                    options={{
+                    options={ {
                         title: 'Home',
-                        headerTitle: 'Welcome To Duo Home',
-                        tabBarIcon: ({ color, focused }) => (
-                            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+                        headerTitle: `Welcome ${ userSession?.firstName }`,
+                        tabBarIcon: ({color, focused}) => (
+                            <TabBarIcon name={ focused ? 'home' : 'home-outline' } color={ color }/>
                         )
                     }
                     }
                 />
-                {/*<Tabs.Screen*/}
-                {/*    name="agenda"*/}
-                {/*    options={{*/}
-                {/*        title: 'Agenda',*/}
-                {/*        tabBarIcon: ({color, focused}) => (*/}
-                {/*            <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color}/>*/}
-                {/*        )*/}
-                {/*    }}*/}
-                {/*/>*/}
+                {/*<Tabs.Screen*/ }
+                {/*    name="agenda"*/ }
+                {/*    options={{*/ }
+                {/*        title: 'Agenda',*/ }
+                {/*        tabBarIcon: ({color, focused}) => (*/ }
+                {/*            <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color}/>*/ }
+                {/*        )*/ }
+                {/*    }}*/ }
+                {/*/>*/ }
                 <Tabs.Screen
                     name="CalendarScreen"
-                    options={{
+                    options={ {
                         title: 'Calendar',
-                        tabBarIcon: ({ color, focused }) => (
-                            <TabBarIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} />
-                        ),
-                    }}
+                        tabBarIcon: ({color, focused}) => (
+                            <TabBarIcon name={ focused ? 'calendar' : 'calendar-outline' } color={ color }/>
+                        )
+                    } }
                 />
             </Tabs>
         </GluestackUIProvider>

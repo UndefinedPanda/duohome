@@ -1,6 +1,7 @@
 # DuoHome
 
 ### Notes
+
     - Parents can create a family
     - Co-Parents and Step Parents can be added to families via QR code  ** user invite for now ** 
     - All Events will be saved under the family
@@ -11,17 +12,23 @@
     - Events will have predetermined types
     - Event Types will have predefined colours, which the user can customize
 
+    - Save User Preferences in the database and load on sign in
+        - Calendar Dot Colors, Themes, etc.
+
 ### Family Schema
+
     - id
     - name
     - premium_family
 
 ### FamilyParent Schema
+
     - id
     - family_id
     - parent_id
 
 ### Parents Schema
+
     - id
     - email
     - first_name
