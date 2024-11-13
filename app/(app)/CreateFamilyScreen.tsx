@@ -31,7 +31,7 @@ import { AlertCircleIcon, ChevronDownIcon } from '@/components/ui/icon';
 import { ThemedView } from '@/components/ThemedView';
 import { router } from 'expo-router';
 import { supabase } from '@/lib/Supabase';
-import { useStorageState } from '@/app/UseStorageState';
+import { setStorageItemAsync, useStorageState } from '@/app/UseStorageState';
 
 interface Child {
     name: string,
@@ -43,7 +43,7 @@ export default function CreateFamilyScreen() {
 
     const ERROR_MESSAGE_TIMEOUT = 5000;
 
-    const {login} = useSession();
+    const { login } = useSession();
 
     const [errorMessage, setErrorMessage] = useState('');
     const [isInvalid, setIsInvalid] = useState(false);
@@ -57,10 +57,11 @@ export default function CreateFamilyScreen() {
 
     const [show, setShow] = useState(false);
 
+    const [[isLoading, session], setSession] = useStorageState('session');
 
     useEffect(() => {
         setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT);
-    }, [isInvalid]);
+    }, [isInvalid, session]);
 
     const onChange = (event: any, selectedDate: any) => {
         const currentDate = new Date(selectedDate);
@@ -83,7 +84,6 @@ export default function CreateFamilyScreen() {
 
     const handleAddChild = async () => {
         const originalDate = new Date(1980, 1, 1);
-        console.log(children);
 
         if (!childName) return Alert.alert('You must add a child name')
         if (childBirthday.getDate() === originalDate.getDate()) return Alert.alert('You must input a valid birthday')
@@ -93,7 +93,7 @@ export default function CreateFamilyScreen() {
             birthday: childBirthday.toISOString()
         }
 
-        if (children.some(({name}) => name === newChild.name)) {
+        if (children.some(({ name }) => name === newChild.name)) {
             return Alert.alert(childName + ' Is already in your family');
         }
 
@@ -120,12 +120,10 @@ export default function CreateFamilyScreen() {
     const updateParentType = async () => {
         if (!parentType) return Alert.alert('You must select whether you are the father or the mother');
 
-        const {data: {user}} = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         if (!user) return Alert.alert('Something went wrong. Please make sure you have internet connection.')
 
-        console.log(user.id);
-
-        const {error} = await supabase.from('parents').update({
+        const { error } = await supabase.from('parents').update({
             parent_type: parentType
         }).eq('id', user.id).select();
 
@@ -145,11 +143,11 @@ export default function CreateFamilyScreen() {
 
         if (!updatedParentType) Alert.alert('There was an error.')
 
-        const {data: {user}} = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) return Alert.alert('Something went wrong. Please make sure you have internet connection.')
 
-        const {data, error} = await supabase.from('families').insert([{
+        const { data, error } = await supabase.from('families').insert([{
             name: familyName
         }]).select().limit(1).single();
 
@@ -171,6 +169,16 @@ export default function CreateFamilyScreen() {
 
         // TODO: Set the session with the new family id
 
+        const oldSession: UserSession = JSON.parse(session ? session : '');
+
+        const newSession = {
+            userId: oldSession.userId,
+            firstName: oldSession.firstName,
+            familyId: data?.id
+        }
+        console.log(newSession);
+        setSession(JSON.stringify(newSession))
+
         await addChildrenToDatabaseAndFamily(data)
         return true
     }
@@ -178,33 +186,30 @@ export default function CreateFamilyScreen() {
     const addChildrenToDatabaseAndFamily = async (family: any) => {
 
         children.forEach(child => child.family_id = family.id)
-        console.log(children);
 
-        const {data, error} = await supabase.from('children').insert(children).select();
+        const { data, error } = await supabase.from('children').insert(children).select();
         if (error) {
             console.log(error.message)
             setErrorMessage('There was an error. Please try again');
             return
         }
-
-
     }
 
     return (
 
         <KeyboardAwareScrollView>
-            <Center style={ styles.container }>
+            <Center style={styles.container}>
                 <VStack className="w-full p-4">
                     <Center>
-                        <ThemedText style={ styles.errorMessage }>{ errorMessage }</ThemedText>
+                        <ThemedText style={styles.errorMessage}>{errorMessage}</ThemedText>
                     </Center>
 
                     <FormControl className="py-4"
-                                 isInvalid={ isInvalid }
-                                 size="lg"
-                                 isDisabled={ false }
-                                 isReadOnly={ false }
-                                 isRequired={ false }
+                        isInvalid={isInvalid}
+                        size="lg"
+                        isDisabled={false}
+                        isReadOnly={false}
+                        isRequired={false}
                     >
                         <FormControlLabel>
                             <FormControlLabelText>Family Name</FormControlLabelText>
@@ -213,12 +218,12 @@ export default function CreateFamilyScreen() {
                             <InputField
                                 type="text"
                                 placeholder="Family Name"
-                                value={ familyName }
-                                onChangeText={ (name) => onFamilyNameChange(name) }
+                                value={familyName}
+                                onChangeText={(name) => onFamilyNameChange(name)}
                             />
                         </Input>
                         <FormControlError>
-                            {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/ }
+                            {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}
                             <FormControlErrorText>
                                 A Family Name Is Required
                             </FormControlErrorText>
@@ -231,37 +236,37 @@ export default function CreateFamilyScreen() {
                                 I Am The
                             </FormControlLabelText>
                         </FormControlLabel>
-                        <Select onValueChange={ handleSelectChange }>
+                        <Select onValueChange={handleSelectChange}>
                             <SelectTrigger className="border-black">
-                                <SelectInput placeholder="Please Choose One"/>
-                                <SelectIcon className="mr-3" as={ ChevronDownIcon }/>
+                                <SelectInput placeholder="Please Choose One" />
+                                <SelectIcon className="mr-3" as={ChevronDownIcon} />
                             </SelectTrigger>
                             <SelectPortal>
-                                <SelectBackdrop/>
-                                <SelectContent style={ styles.selectContent }>
-                                    <SelectItem label="Father" value="father" textStyle={ {
+                                <SelectBackdrop />
+                                <SelectContent style={styles.selectContent}>
+                                    <SelectItem label="Father" value="father" textStyle={{
                                         size: '3xl'
 
-                                    } }/>
-                                    <SelectItem label="Mother" value="mother" textStyle={ {
+                                    }} />
+                                    <SelectItem label="Mother" value="mother" textStyle={{
                                         size: '3xl'
-                                    } }/>
+                                    }} />
                                 </SelectContent>
                             </SelectPortal>
                         </Select>
                         <FormControlError>
-                            <FormControlErrorIcon as={ AlertCircleIcon }/>
+                            <FormControlErrorIcon as={AlertCircleIcon} />
                             <FormControlErrorText>Mandatory field</FormControlErrorText>
                         </FormControlError>
                     </FormControl>
 
 
                     <FormControl className="mb-2"
-                                 isInvalid={ isInvalid }
-                                 size="lg"
-                                 isDisabled={ false }
-                                 isReadOnly={ false }
-                                 isRequired={ false }
+                        isInvalid={isInvalid}
+                        size="lg"
+                        isDisabled={false}
+                        isReadOnly={false}
+                        isRequired={false}
                     >
                         <FormControlLabel>
                             <FormControlLabelText>Child Name</FormControlLabelText>
@@ -270,12 +275,12 @@ export default function CreateFamilyScreen() {
                             <InputField
                                 type="text"
                                 placeholder="Joe"
-                                value={ childName }
-                                onChangeText={ (name) => onChildNameChange(name) }
+                                value={childName}
+                                onChangeText={(name) => onChildNameChange(name)}
                             />
                         </Input>
                         <FormControlError>
-                            {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/ }
+                            {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}
                             <FormControlErrorText>
                                 A Child Name Is Required
                             </FormControlErrorText>
@@ -284,21 +289,21 @@ export default function CreateFamilyScreen() {
                     <SafeAreaView>
                         <HStack className="mb-5">
                             <FormControl className="py-3"
-                                         isInvalid={ isInvalid }
-                                         size="lg"
-                                         isDisabled={ false }
-                                         isReadOnly={ false }
-                                         isRequired={ false }
+                                isInvalid={isInvalid}
+                                size="lg"
+                                isDisabled={false}
+                                isReadOnly={false}
+                                isRequired={false}
                             >
                                 <FormControlLabel>
                                     <FormControlLabelText>Child Birthday</FormControlLabelText>
                                 </FormControlLabel>
                                 <DateTimePicker
-                                    style={ styles.datePicker }
+                                    style={styles.datePicker}
                                     testID="dateTimePicker"
-                                    value={ childBirthday }
-                                    mode={ 'date' }
-                                    onChange={ onChange }
+                                    value={childBirthday}
+                                    mode={'date'}
+                                    onChange={onChange}
                                 />
                             </FormControl>
                         </HStack>
@@ -307,27 +312,27 @@ export default function CreateFamilyScreen() {
                     <Center className="mb-3">
                         <ThemedText>
                             <ThemedText
-                                style={ {color: Colors.light.green} }>{ children.length }
+                                style={{ color: Colors.light.green }}>{children.length}
                             </ThemedText>
-                            { children.length === 1 ? ' child' : ' children' } added
+                            {children.length === 1 ? ' child' : ' children'} added
                         </ThemedText>
                     </Center>
 
-                    <Button style={ styles.addChildButton } className="w-full self-end" size="xl"
-                            onPress={ handleAddChild }>
+                    <Button style={styles.addChildButton} className="w-full self-end" size="xl"
+                        onPress={handleAddChild}>
                         <ButtonText> Add Child</ButtonText>
                     </Button>
 
-                    { children.length > 0 ? (
+                    {children.length > 0 ? (
                         <ButtonGroup>
-                            <Button style={ styles.createFamilyButton }
-                                    disabled={ false } className="w-full self-end mt-4"
-                                    size="xl"
-                                    onPress={ handleCreateFamily }>
+                            <Button style={styles.createFamilyButton}
+                                disabled={false} className="w-full self-end mt-4"
+                                size="xl"
+                                onPress={handleCreateFamily}>
                                 <ButtonText>Create Family</ButtonText>
                             </Button>
                         </ButtonGroup>
-                    ) : '' }
+                    ) : ''}
                 </VStack>
             </Center>
         </KeyboardAwareScrollView>

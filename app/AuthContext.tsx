@@ -1,4 +1,4 @@
-import { useContext, createContext, type PropsWithChildren } from 'react';
+import { useContext, createContext, type PropsWithChildren, useEffect } from 'react';
 import { useStorageState } from './UseStorageState';
 import { router } from 'expo-router'
 import { supabase } from '@/lib/Supabase';
@@ -29,12 +29,14 @@ const AuthContext = createContext<{
     login: (email: string, password: string) => any;
     logOut: () => void;
     session?: string | undefined | null;
+    setUserSession?: (oldSession: UserSession) => void;
     isLoading: boolean;
 }>({
     register: async (email: string, firstName: string, lastName: string, password: string) => null,
     login: async (email: string, password: string) => null,
     logOut: () => null,
     session: null,
+    setUserSession: () => null,
     isLoading: false
 });
 
@@ -53,6 +55,11 @@ export function useSession() {
 export function SessionProvider({children}: PropsWithChildren) {
 
     const [[isLoading, session], setSession] = useStorageState('session');
+
+    useEffect(() => {
+
+    }, [session])
+
 
     const registerUser = async (email: string, password: string, firstName: string) => {
         const {error} = await supabase.auth.signUp({
@@ -94,7 +101,7 @@ export function SessionProvider({children}: PropsWithChildren) {
         const {
             data: family_parent,
             error
-        } = await supabase.from('family_parent').select('*').eq('parent_id', user.id).limit(1).single();
+        } = await supabase.from('family_parent').select('*').eq('parent_id', user.id).limit(1);
 
         if (error) {
             return {
@@ -109,7 +116,7 @@ export function SessionProvider({children}: PropsWithChildren) {
         const userSession: UserSession = {
             userId: user.id,
             firstName: user.user_metadata.first_name,
-            familyId: family_parent.family_id
+            familyId: family_parent[0]?.family_id
         }
 
         const sessionString = JSON.stringify(userSession);

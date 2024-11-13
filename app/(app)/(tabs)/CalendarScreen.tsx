@@ -26,7 +26,6 @@ export default function CalendarScreen() {
     }
 
     useEffect(() => {
-        console.log(selectedDate);
         //@ts-ignore
         calendarRef.current?.setVisibleDate(selectedDate);
         //@ts-ignore
@@ -75,7 +74,6 @@ export default function CalendarScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 100
     },
     timeline: {
         width: '100%',

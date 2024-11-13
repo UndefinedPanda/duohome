@@ -1,10 +1,7 @@
-import { StyleSheet, View } from 'react-native';
-
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button'
 import { useSession } from '@/app/AuthContext'
-import { CalendarBody, CalendarContainer, CalendarHeader } from '@howljs/calendar-kit';
-import { Calendar, CalendarUtils } from 'react-native-calendars';
-
+import { CalendarUtils } from 'react-native-calendars';
 import { Colors } from '../../../constants/Colors';
 import { ThemedView } from '@/components/ThemedView';
 import { HStack } from '@/components/ui/hstack';
@@ -14,8 +11,9 @@ import { Text } from '@/components/ui/text';
 import { Grid, GridItem } from '@/components/ui/grid';
 import { VStack } from '@/components/ui/vstack';
 import { router } from 'expo-router';
-
-const TODAYS_DATE = CalendarUtils.getCalendarDateString(new Date());
+import { useStorageState } from '@/app/UseStorageState';
+import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar';
+import { ThemedText } from '@/components/ThemedText';
 
 const CARD_SIZE = 'lg';
 
@@ -26,177 +24,224 @@ export default function HomeScreen() {
     //     return CalendarUtils.getCalendarDateString(newDate);
     // };
 
-    const {session} = useSession();
-
-    const userSession = session ? JSON.parse(session) : undefined;
-    console.log(userSession)
+    const { logOut } = useSession();
+    const [[isLoading, session], setSession] = useStorageState('session');
+    const userSession = session ? JSON.parse(session) : {}
 
     const openCreateFamilyScreen = () => {
         router.push('/CreateFamilyScreen')
     }
 
-    const {logOut} = useSession();
+    const openViewFamilyScreen = () => {
+        router.push('/ViewFamilyScreen')
+    }
 
     return (
-        <ThemedView style={ styles.mainContainer }>
-            <View style={ styles.calendarContainer }>
-                {/* <Calendar
-                    style={styles.calendar}
-                    minDate={getDate(-14)}
-                    markingType={'multi-dot'}
-                    markedDates={{
-                        [getDate(10)]: {
-                            color: '#70d7c7',
-                            customTextStyle: {
-                                color: '#FFFAAA',
-                                fontWeight: '700'
-                            },
-                            dots: [
-                                { key: 'vacation', color: 'blue', selectedDotColor: 'red' },
-                                { key: 'massage', color: 'red', selectedDotColor: 'white' }
-                            ]
-                        },
-
-                    }}
-                    theme={{
-                        // textInactiveColor: 'white',
-                        textSectionTitleDisabledColor: Colors.light.text,
-                        textSectionTitleColor: Colors.light.text,
-                        arrowColor: Colors.light.text,
-                        monthTextColor: Colors.light.green,
-                        selectedDayBackgroundColor: '#00adf5',
-                        selectedDayTextColor: '#ffffff',
-                    }}
-                    onDayPress={(day: { dateString: any; }) => console.warn('day pressed')}
-                /> */ }
-            </View>
-            <Grid style={ styles.cardsContainer } _extra={ {
-                className: 'grid-cols-8'
-            } }>
-                <GridItem _extra={ {
-                    className: 'col-span-8'
-                } }>
-                    <Card style={ styles.card } size={ CARD_SIZE } variant="elevated" className="m-3 rounded-none ">
-                        <HStack space="2xl">
-                            <VStack style={ styles.eventVStack }>
-                                <Heading style={ styles.heading } size="lg" className="mb-1">
-                                    Today's Event
-                                </Heading>
-                                <Text size="md">Dentist Appointment</Text>
-                                <Text size="md">Time: 3:15pm</Text>
-                                <Text size="md">For: Alex</Text>
-                            </VStack>
-                            <VStack>
-                                <Heading style={ styles.heading } size="lg" className="mb-1">
-                                    Notifications
-                                </Heading>
-                                <Text size="md">2 Unread Messages</Text>
-                                <Text size="md">1 Change Request</Text>
-                                <Text size="md">1 New Document</Text>
-                                <Text size="md">5 New Pictures</Text>
-                            </VStack>
-                        </HStack>
-                    </Card>
+        <ThemedView style={styles.mainContainer}>
+            <Grid style={styles.headerContainer} _extra={{
+                className: 'grid-cols-12'
+            }}>
+                <GridItem _extra={{
+                    className: 'col-span-4'
+                }}>
+                    <Avatar className='mt-3' size="2xl" >
+                        <AvatarFallbackText>Jane Doe</AvatarFallbackText>
+                        <AvatarImage
+                            source={{
+                                uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
+                            }}
+                        />
+                    </Avatar>
                 </GridItem>
-                {/* <GridItem _extra={{
-                        className: 'col-span-4'
-                    }}>
-                        <Card size={CARD_SIZE} variant="elevated" className="m-3 rounded-none">
-                            <Heading size="md" className="mb-1">
-                                Unread Messages
-                            </Heading>
-                            <Text size="sm">You have 4 Unread Messages</Text>
-                        </Card>
-                    </GridItem> */ }
-
-                {/* <GridItem _extra={{
-                        className: 'col-span-4'
-                    }}>
-                        <Card size={CARD_SIZE} variant="elevated" className="m-3 rounded-none">
-                            <Heading size="md" className="mb-1">
-                                Recent Documents
-                            </Heading>
-                            <Text size="sm">1 new document</Text>
-                        </Card>
-                    </GridItem> */ }
-                <GridItem _extra={ {
+                <GridItem _extra={{
                     className: 'col-span-8'
-                } }>
-                    <Card style={ styles.card } size={ CARD_SIZE } variant="elevated" className="m-3 rounded-none ">
-                        <Heading style={ styles.heading } size="lg" className="mb-1">
-                            Quick Actions
+                }}>
+                    <VStack className='flex '>
+                        <Button className="mt-4 bg-red-500 rounded-lg" size="xl" onPress={logOut}>
+                            <ButtonText>Logout</ButtonText>
+                        </Button>
+                        {userSession?.familyId ?
+                            <Button className="mt-4 bg-cyan-950 rounded-lg" size="xl"
+                                onPress={openViewFamilyScreen}>
+                                <ButtonText>View Family</ButtonText>
+                            </Button>
+                            :
+                            <Button className="mt-4 bg-cyan-950 rounded-lg" size="xl"
+                                onPress={openCreateFamilyScreen}>
+                                <ButtonText>Create Family</ButtonText>
+                            </Button>
+                        }
+                    </VStack>
+                </GridItem>
+            </Grid>
+            <Grid style={styles.upComingEventsContainer} _extra={{
+                className: 'grid-cols-8'
+            }}>
+                <GridItem _extra={{
+                    className: 'col-span-8'
+                }}>
+                    <Card style={styles.upComingEventCard} size={CARD_SIZE} variant="elevated" className="m-3">
+                        <Heading style={styles.heading} size="xl" className="mb-1">
+                            Upcoming Events
                         </Heading>
-                        <HStack space="2xl">
-                            <VStack style={ styles.eventVStack }>
-                                <Text size="md">Create Event</Text>
-                                <Text size="md">Message Co-Parent</Text>
-                                <Text size="md">Scan Document</Text>
-                                <Text size="md">Upload Image</Text>
-                            </VStack>
-                            <VStack>
-                                { userSession?.familyId ?
-                                    <Button className="mt-4 bg-primary-500" size="xl"
-                                            onPress={ openCreateFamilyScreen }>
-                                        <ButtonText>View Family</ButtonText>
-                                    </Button>
-                                    :
-                                    <Button className="mt-4 bg-primary-500" size="xl"
-                                            onPress={ openCreateFamilyScreen }>
-                                        <ButtonText>Create Family</ButtonText>
-                                    </Button>
-                                }
-                                <Button className="mt-4 bg-primary-500" size="xl" onPress={ logOut }>
-                                    <ButtonText>Logout</ButtonText>
-                                </Button>
-                                <Text size="md">1 Appointment Change Request</Text>
-                                <Text size="md">1 New Document</Text>
-                                <Text size="md">5 New Pictures</Text>
-                            </VStack>
-                        </HStack>
+                        <VStack>
+                            <Heading size="lg" className="mb-1">
+                                Today
+                            </Heading>
+
+                            <Card className='bg-emerald-100' size='sm' variant="elevated">
+
+                                <HStack>
+                                    <View style={styles.littleEventBar}>
+
+                                    </View>
+                                    <VStack>
+                                        <ThemedText>Dr. Appointment: Brody - 3:30pm</ThemedText>
+                                        <ThemedText>Scholars: Ryan - 1:00pm </ThemedText>
+                                    </VStack>
+                                </HStack>
+
+                            </Card>
+
+                        </VStack>
                     </Card>
                 </GridItem>
             </Grid>
+            <View>
+                <Grid _extra={{
+                    className: 'grid-cols-8'
+                }}>
+                    <GridItem _extra={{
+                        className: 'col-span-8'
+                    }}>
+                        <Heading style={styles.heading} size="xl" className="mx-3">
+                            Messages
+                        </Heading>
+                        <TouchableOpacity>
+                            <HStack className='mr-3' style={{ width: '85%' }}>
+                                <Card style={styles.cardNumber} size='md' className="ml-3 mt-3">
+                                    <Heading size='xl'>0</Heading>
+                                </Card>
+                                <Card style={styles.eventCard} size='md' className="mr-3 mt-3">
+                                    <Text size='lg'>New Messages</Text>
+                                </Card>
+                            </HStack>
+                        </TouchableOpacity>
+                    </GridItem>
+                    <GridItem _extra={{
+                        className: 'col-span-8'
+                    }}>
+                        <Heading style={styles.heading} size="xl" className="mx-3">
+                            Event Change Requests
+                        </Heading>
+                        <TouchableOpacity>
+                            <HStack className='mr-3' style={{ width: '85%' }}>
+                                <Card style={styles.cardNumber} size='md' className="ml-3 mt-3">
+                                    <Heading size='xl'>0</Heading>
+                                </Card>
+                                <Card style={styles.eventCard} size='md' className="mr-3 mt-3">
+                                    <Text size='lg'>New Requests</Text>
+                                </Card>
+                            </HStack>
+                        </TouchableOpacity>
+                    </GridItem>
+                    <GridItem _extra={{
+                        className: 'col-span-8'
+                    }}>
+                        <Heading style={styles.heading} size="xl" className="mx-3">
+                            Images
+                        </Heading>
+                        <TouchableOpacity>
+                            <HStack className='mr-3' style={{ width: '85%' }}>
+                                <Card style={styles.cardNumber} size='md' className="ml-3 mt-3 ">
+                                    <Heading size='xl'>0</Heading>
+                                </Card>
+                                <Card style={styles.eventCard} size='md' className="mr-3 mt-3">
+                                    <Text size='lg'>New Images</Text>
+                                </Card>
+                            </HStack>
+                        </TouchableOpacity>
+                    </GridItem>
+                    <GridItem _extra={{
+                        className: 'col-span-8'
+                    }}>
+                        <Heading style={styles.heading} size="xl" className="mx-3">
+                            Documents
+                        </Heading>
+                        <TouchableOpacity>
+                            <HStack className='mr-3' style={{ width: '85%' }}>
+                                <Card style={styles.cardNumber} size='md' className="ml-3 mt-3">
+                                    <Heading size='xl'>0</Heading>
+                                </Card>
+                                <Card style={styles.eventCard} size='md' className="mr-3 mt-3">
+                                    <Text size='lg'>New Documents</Text>
+                                </Card>
+                            </HStack>
+                        </TouchableOpacity>
+                    </GridItem>
+                </Grid>
+            </View>
         </ThemedView>
     );
 };
-{/* <Button className="w-full self-end mt-6 bg-primary-500" size="md" onPress={() => {
-                logOut();
-            }}>
-                <ButtonText>Log Out</ButtonText>
-            </Button> */
-}
 
 const styles = StyleSheet.create({
     mainContainer: {
-        marginTop: 30,
         width: "100%",
         height: '100%'
     },
-    calendarContainer: {
-        paddingLeft: 10,
-        paddingRight: 10,
-        width: '100%'
-    },
-    cardsContainer: {
+    headerContainer: {
         width: '100%',
-        height: '100%',
-        marginTop: 20
+        height: 200,
+        padding: 15,
+        backgroundColor: Colors.light.green
     },
-    cardsStack: {
-        width: '100%'
+    upComingEventsContainer: {
+        height: 200,
+        marginTop: -60
     },
-    card: {
+    cardNumber: {
+        borderTopEndRadius: 0,
+        borderBottomEndRadius: 0,
+        borderTopLeftRadius: 20,
+        borderBottomLeftRadius: 5,
+        backgroundColor: Colors.light.green,
         marginBottom: 20,
-        shadowColor: '#000',
-        shadowOpacity: 0.25,
-        shadowOffset: {width: 0, height: 0},
-        shadowRadius: 3
+        shadowColor: '#151515',
+        shadowOpacity: 0.15,
+        shadowOffset: { width: 0, height: 0 },
+        shadowRadius: 2
+    },
+    eventCard: {
+        width: '100%',
+        marginBottom: 20,
+        shadowColor: '#151515',
+        shadowOpacity: 0.15,
+        shadowOffset: { width: 0, height: 0 },
+        shadowRadius: 2
+    },
+    littleEventBar: {
+        width: 10,
+        borderRadius: 5,
+        backgroundColor: Colors.light.darkGreen,
+        marginRight: 10,
+    },
+    upComingEventCard: {
+        height: 175,
+        marginBottom: 20,
+        shadowColor: '#151515',
+        shadowOpacity: 0.15,
+        shadowOffset: { width: 0, height: 0 },
+        shadowRadius: 2
     },
     eventVStack: {
         marginRight: 40
     },
     heading: {
         color: Colors.light.green
+    },
+    informationSectionNumber: {
+        paddingRight: 20,
     },
     text: {
         textAlign: 'center',
@@ -210,40 +255,5 @@ const styles = StyleSheet.create({
     defaultText: {
         color: 'purple'
     },
-    calendar: {
-        height: 320,
-        paddingRight: 10,
-        paddingLeft: 10,
-        backgroundColor: Colors.light.beige,
-        color: Colors.light.text,
-        shadowColor: '#000',
-        shadowOpacity: 0.25,
-        shadowOffset: {width: 0, height: 0},
-        shadowRadius: 5
-    }
-    // customCalendar: {
-    //     height: 250,
-    //     borderBottomWidth: 1,
-    //     borderBottomColor: 'lightgrey'
-    // },
-    // customDay: {
-    //     textAlign: 'center'
-    // },
-    // customHeader: {
-    //     backgroundColor: '#FCC',
-    //     flexDirection: 'row',
-    //     justifyContent: 'space-around',
-    //     marginHorizontal: -4,
-    //     padding: 8
-    // },
-    // customTitleContainer: {
-    //     flexDirection: 'row',
-    //     alignItems: 'center',
-    //     padding: 10
-    // },
-    // customTitle: {
-    //     fontSize: 16,
-    //     fontWeight: 'bold',
-    //     color: '#00BBF2'
-    // }
+
 });

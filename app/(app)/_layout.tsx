@@ -7,7 +7,7 @@ import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
 import { Colors } from '@/constants/Colors';
 
 export default function AppLayout() {
-    const {session, isLoading} = useSession()
+    const { session, isLoading } = useSession()
     const colorScheme = useColorScheme()
 
     // You can keep the splash screen open, or render a loading screen like we do here.
@@ -21,7 +21,7 @@ export default function AppLayout() {
         // On web, static rendering will stop here as the user is not authenticated
         // in the headless Node process that the pages are rendered in.
         // @ts-ignore
-        return <Redirect href="/Login"/>
+        return <Redirect href="/Login" />
     }
 
     // This layout can be deferred because it's not the root layout.
@@ -30,15 +30,35 @@ export default function AppLayout() {
             <SessionProvider>
                 <Stack>
                     <Stack.Screen name="(tabs)" options={{
-                        headerShown: false, headerTitle: 'Home'
-                    }}/>
+                        headerShown: false, headerTitle: 'Home',
+                        contentStyle: {
+                            backgroundColor: '#fff'
+                        },
+                    }} />
                     <Stack.Screen name="CreateFamilyScreen" options={{
                         headerShown: true,
                         headerTitle: 'Create Your Family',
+                        headerTintColor:'#fff',
+                        headerBackTitle:'Back',
                         headerStyle: {
-                            backgroundColor: Colors.light.beige
+                            backgroundColor: Colors.light.green
+                        },
+                        contentStyle: {
+                            backgroundColor: '#fff'
+                        },
+                    }} />
+                    <Stack.Screen name="ViewFamilyScreen" options={{
+                        contentStyle: {
+                            backgroundColor: '#fff'
+                        },
+                        headerTintColor:'#fff',
+                        headerBackTitle:'Back',
+                        headerShown: true,
+                        headerTitle: 'View Your Family',
+                        headerStyle: {
+                            backgroundColor: Colors.light.green
                         }
-                    }}/>
+                    }} />
                 </Stack>
             </SessionProvider>
         </GluestackUIProvider>

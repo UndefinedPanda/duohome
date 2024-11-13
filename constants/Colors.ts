@@ -3,7 +3,7 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const PRIMARY_RED = "#49111C"
+const PRIMARY_RED = "#a63d40"
 
 const tintColorLight = PRIMARY_RED;
 const tintColorDark = '#fff';
@@ -12,12 +12,13 @@ export const Colors = {
     light: {
         text: '#0a0908',
         background: '#fff',
-        red: '#49111C',
-        blue:'#37718e',
+        red: '#a63d40',
+        blue: '#37718e',
         errorRed: '#c33c54',
         beige: '#eae0c9',
         darkBeige: '#c9bda2',
-        green: '#5b905b',
+        green: '#5B905B',
+        darkGreen: '#3f653f',
         buttonColor: PRIMARY_RED,
         tint: tintColorLight,
         icon: '#687076',
