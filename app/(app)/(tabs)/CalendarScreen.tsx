@@ -3,6 +3,7 @@ import { StyleSheet, View, ScrollView } from 'react-native';
 import { Calendar, CalendarUtils } from 'react-native-calendars';
 
 import CalendarKit from '@howljs/calendar-kit';
+import { ThemedView } from '@/components/ThemedView';
 
 
 const TODAYS_DATE = CalendarUtils.getCalendarDateString(new Date());
@@ -37,7 +38,7 @@ export default function CalendarScreen() {
     }, [selectedDate])
 
     return (
-        <ScrollView style={styles.container}>
+        <ThemedView style={styles.container}>
             <Calendar
                 minDate={getDate(-14)}
                 markingType={'multi-dot'}
@@ -67,7 +68,7 @@ export default function CalendarScreen() {
             <View style={styles.timeline} ref={calendarViewRef}>
                 <CalendarKit ref={calendarRef} numberOfDays={1} scrollToNow={false}/>
             </View>
-        </ScrollView>
+        </ThemedView>
     );
 };
 

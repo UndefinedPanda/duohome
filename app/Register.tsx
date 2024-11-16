@@ -17,6 +17,7 @@ import { StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { ThemedText } from '@/components/ThemedText';
 import { supabase } from '@/lib/Supabase';
+import { ThemedView } from '@/components/ThemedView';
 
 export default function RegisterScreen() {
     const ERROR_MESSAGE_TIMEOUT = 10000
@@ -64,8 +65,9 @@ export default function RegisterScreen() {
 
             if (!registered) {
                 setEmailErrorMessage(errorMessage)
+                return;
             }
-            router.replace('/')
+            router.replace('/(app)/(tabs)')
         }
     }
 
@@ -104,162 +106,161 @@ export default function RegisterScreen() {
 
     return (
         <KeyboardAwareScrollView>
-            <Center style={styles.container}>
-                <VStack className="w-full px-4">
+                <Center style={styles.container}>
+                    <VStack className="w-full px-4">
 
-                    <Center>
-                        <Image
-                            size="2xl"
-                            source={require('../assets/images/logo1.png')}
-                            alt="image"
-                        />
-                    </Center>
+                        <Center>
+                            <Image
+                                size="2xl"
+                                source={require('../assets/images/logo.png')}
+                                alt="image"
+                            />
+                        </Center>
 
+                        <FormControl className="py-1"
+                            isInvalid={isInvalid}
+                            size="md"
+                            isDisabled={false}
+                            isReadOnly={false}
+                            isRequired={false}
+                        >
+                            <FormControlLabel>
+                                <FormControlLabelText>Email</FormControlLabelText>
+                            </FormControlLabel>
+                            <Input className="my-1 border-black" size="xl">
+                                <InputField
+                                    type="text"
+                                    placeholder="Email Address"
+                                    value={email}
+                                    onChangeText={(text) => handleEmailChange(text)}
+                                />
+                            </Input>
+                            <FormControlHelper>
+                                <FormControlHelperText>
+                                    Must be a valid email address.
+                                </FormControlHelperText>
+                            </FormControlHelper>
+                            <FormControlError>
+                                {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}
+                                <FormControlErrorText>
+                                    {emailErrorMessage}
+                                </FormControlErrorText>
+                            </FormControlError>
+                        </FormControl>
+                        <FormControl className="py-1"
+                            isInvalid={isInvalid}
+                            size="md"
+                            isDisabled={false}
+                            isReadOnly={false}
+                            isRequired={false}
+                        >
+                            <FormControlLabel>
+                                <FormControlLabelText>First Name</FormControlLabelText>
+                            </FormControlLabel>
+                            <Input className="my-1 border-black" size="xl">
+                                <InputField
+                                    type="text"
+                                    placeholder="First Name"
+                                    value={firstName}
+                                    onChangeText={(text) => handleFirstNameChange(text)}
+                                />
+                            </Input>
+                            <FormControlHelper>
+                                <FormControlHelperText>
+                                    Please enter your first name
+                                </FormControlHelperText>
+                            </FormControlHelper>
+                        </FormControl>
+                        <FormControl className="py-1"
+                            isInvalid={isInvalid}
+                            size="md"
+                            isDisabled={false}
+                            isReadOnly={false}
+                            isRequired={false}
+                        >
+                            <FormControlLabel>
+                                <FormControlLabelText>Last Name</FormControlLabelText>
+                            </FormControlLabel>
+                            <Input className="my-1 border-black" size="xl">
+                                <InputField
+                                    type="text"
+                                    placeholder="Last Name"
+                                    value={lastName}
+                                    onChangeText={(text) => handleLastNameChange(text)}
+                                />
+                            </Input>
+                            <FormControlHelper>
+                                <FormControlHelperText>
+                                    Please enter your last name
+                                </FormControlHelperText>
+                            </FormControlHelper>
+                        </FormControl>
+                        <FormControl className="py-1"
+                            isInvalid={isInvalid}
+                            size="md"
+                            isDisabled={false}
+                            isReadOnly={false}
+                            isRequired={false}
+                        >
+                            <FormControlLabel>
+                                <FormControlLabelText>Password</FormControlLabelText>
+                            </FormControlLabel>
+                            <Input className="my-1 border-black" size="xl">
+                                <InputField
+                                    type="password"
+                                    placeholder="Password"
+                                    value={password}
+                                    onChangeText={(text) => handlePasswordChange(text)}
+                                />
+                            </Input>
+                            <FormControlHelper>
+                                <FormControlHelperText>
+                                    Must be at least 6 characters.
+                                </FormControlHelperText>
+                            </FormControlHelper>
+                            <FormControlError>
+                                {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}
+                                <FormControlErrorText>
+                                    {passwordErrorMessage}
+                                </FormControlErrorText>
+                            </FormControlError>
+                        </FormControl>
+                        <FormControl
+                            isInvalid={isInvalid}
+                            size="md"
+                            isDisabled={false}
+                            isReadOnly={false}
+                            isRequired={false}
+                        >
+                            <FormControlLabel>
+                                <FormControlLabelText>Confirm Password</FormControlLabelText>
+                            </FormControlLabel>
+                            <Input className="my-1 border-black" size="xl">
+                                <InputField
+                                    type="password"
+                                    placeholder="Confirm Password"
+                                    value={confirmPassword}
+                                    onChangeText={(text) => handleConfirmPasswordChange(text)}
+                                />
+                            </Input>
+                            <FormControlError>
+                                {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}
+                                <FormControlErrorText>
+                                    {passwordErrorMessage}
+                                </FormControlErrorText>
+                            </FormControlError>
+                        </FormControl>
 
-                    <FormControl className="py-1"
-                        isInvalid={isInvalid}
-                        size="md"
-                        isDisabled={false}
-                        isReadOnly={false}
-                        isRequired={false}
-                    >
-                        <FormControlLabel>
-                            <FormControlLabelText>Email</FormControlLabelText>
-                        </FormControlLabel>
-                        <Input className="my-1 border-black" size="xl">
-                            <InputField
-                                type="text"
-                                placeholder="Email Address"
-                                value={email}
-                                onChangeText={(text) => handleEmailChange(text)}
-                            />
-                        </Input>
-                        <FormControlHelper>
-                            <FormControlHelperText>
-                                Must be a valid email address.
-                            </FormControlHelperText>
-                        </FormControlHelper>
-                        <FormControlError>
-                            {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}
-                            <FormControlErrorText>
-                                {emailErrorMessage}
-                            </FormControlErrorText>
-                        </FormControlError>
-                    </FormControl>
-                    <FormControl className="py-1"
-                        isInvalid={isInvalid}
-                        size="md"
-                        isDisabled={false}
-                        isReadOnly={false}
-                        isRequired={false}
-                    >
-                        <FormControlLabel>
-                            <FormControlLabelText>First Name</FormControlLabelText>
-                        </FormControlLabel>
-                        <Input className="my-1 border-black" size="xl">
-                            <InputField
-                                type="text"
-                                placeholder="First Name"
-                                value={firstName}
-                                onChangeText={(text) => handleFirstNameChange(text)}
-                            />
-                        </Input>
-                        <FormControlHelper>
-                            <FormControlHelperText>
-                                Please enter your first name
-                            </FormControlHelperText>
-                        </FormControlHelper>
-                    </FormControl>
-                    <FormControl className="py-1"
-                        isInvalid={isInvalid}
-                        size="md"
-                        isDisabled={false}
-                        isReadOnly={false}
-                        isRequired={false}
-                    >
-                        <FormControlLabel>
-                            <FormControlLabelText>Last Name</FormControlLabelText>
-                        </FormControlLabel>
-                        <Input className="my-1 border-black" size="xl">
-                            <InputField
-                                type="text"
-                                placeholder="Last Name"
-                                value={lastName}
-                                onChangeText={(text) => handleLastNameChange(text)}
-                            />
-                        </Input>
-                        <FormControlHelper>
-                            <FormControlHelperText>
-                                Please enter your last name
-                            </FormControlHelperText>
-                        </FormControlHelper>
-                    </FormControl>
-                    <FormControl className="py-1"
-                        isInvalid={isInvalid}
-                        size="md"
-                        isDisabled={false}
-                        isReadOnly={false}
-                        isRequired={false}
-                    >
-                        <FormControlLabel>
-                            <FormControlLabelText>Password</FormControlLabelText>
-                        </FormControlLabel>
-                        <Input className="my-1 border-black" size="xl">
-                            <InputField
-                                type="password"
-                                placeholder="Password"
-                                value={password}
-                                onChangeText={(text) => handlePasswordChange(text)}
-                            />
-                        </Input>
-                        <FormControlHelper>
-                            <FormControlHelperText>
-                                Must be at least 6 characters.
-                            </FormControlHelperText>
-                        </FormControlHelper>
-                        <FormControlError>
-                            {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}
-                            <FormControlErrorText>
-                                {passwordErrorMessage}
-                            </FormControlErrorText>
-                        </FormControlError>
-                    </FormControl>
-                    <FormControl
-                        isInvalid={isInvalid}
-                        size="md"
-                        isDisabled={false}
-                        isReadOnly={false}
-                        isRequired={false}
-                    >
-                        <FormControlLabel>
-                            <FormControlLabelText>Confirm Password</FormControlLabelText>
-                        </FormControlLabel>
-                        <Input className="my-1 border-black" size="xl">
-                            <InputField
-                                type="password"
-                                placeholder="Confirm Password"
-                                value={confirmPassword}
-                                onChangeText={(text) => handleConfirmPasswordChange(text)}
-                            />
-                        </Input>
-                        <FormControlError>
-                            {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}
-                            <FormControlErrorText>
-                                {passwordErrorMessage}
-                            </FormControlErrorText>
-                        </FormControlError>
-                    </FormControl>
-
-                    <Button className="w-full self-end mt-6 bg-primary-500" size="md" onPress={handleSubmit}>
-                        <ButtonText>Register</ButtonText>
-                    </Button>
-                    <Center className="mt-6">
-                        <Link className="font-bold" href="/Login">
-                            <ThemedText className="py-2">Already Have An Account? Click Here </ThemedText>
-                        </Link>
-                    </Center>
-                </VStack>
-            </Center>
+                        <Button className="w-full self-end mt-6 bg-primary-500" size="md" onPress={handleSubmit}>
+                            <ButtonText>Register</ButtonText>
+                        </Button>
+                        <Center className="mt-6">
+                            <Link className="font-bold" href="/Login">
+                                <ThemedText className="py-2">Already Have An Account? Click Here </ThemedText>
+                            </Link>
+                        </Center>
+                    </VStack>
+                </Center>
         </KeyboardAwareScrollView>
     );
 }
@@ -269,6 +270,7 @@ const styles = StyleSheet.create({
     container: {
         marginTop: 75,
         paddingLeft: 10,
-        paddingRight: 10
+        paddingRight: 10,
+        paddingBottom: 100,
     }
 })

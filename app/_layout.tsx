@@ -30,7 +30,7 @@ export default function RootLayout() {
     }
 
     return (
-        <GluestackUIProvider mode="light">
+        <GluestackUIProvider>
             <SessionProvider>
                 <Slot/>
             </SessionProvider>

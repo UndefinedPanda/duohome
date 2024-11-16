@@ -12,7 +12,6 @@ import React, { useEffect, useState } from 'react'
 import { Input, InputField } from '@/components/ui/input'
 import { Button, ButtonGroup, ButtonSpinner, ButtonText } from '@/components/ui/button'
 import { Center } from '@/components/ui/center'
-import { Image } from '@/components/ui/image'
 import { Alert, SafeAreaView, StyleSheet } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { ThemedText } from '@/components/ThemedText'
@@ -21,7 +20,7 @@ import { HStack } from '@/components/ui/hstack';
 import {
     Select,
     SelectBackdrop,
-    SelectContent, SelectDragIndicator, SelectDragIndicatorWrapper,
+    SelectContent,
     SelectIcon,
     SelectInput, SelectItem,
     SelectPortal,
@@ -43,7 +42,6 @@ export default function CreateFamilyScreen() {
 
     const ERROR_MESSAGE_TIMEOUT = 5000;
 
-    const { login } = useSession();
 
     const [errorMessage, setErrorMessage] = useState('');
     const [isInvalid, setIsInvalid] = useState(false);
@@ -114,7 +112,7 @@ export default function CreateFamilyScreen() {
         if (!addedFamily) return Alert.alert('There was an error')
         // success
         Alert.alert('family created')
-        router.replace('/')
+        router.replace('/(app)/(tabs)')
     }
 
     const updateParentType = async () => {

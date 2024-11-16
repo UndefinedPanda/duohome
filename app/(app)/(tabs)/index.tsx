@@ -14,8 +14,17 @@ import { router } from 'expo-router';
 import { useStorageState } from '@/app/UseStorageState';
 import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar';
 import { ThemedText } from '@/components/ThemedText';
+import { supabase } from '@/lib/Supabase';
+import { useEffect, useState } from 'react';
+import moment from 'moment';
 
 const CARD_SIZE = 'lg';
+
+interface TodayEvent {
+    type?: string;
+    date?: string;
+    children_names?: any[]
+}
 
 export default function HomeScreen() {
     // const getDate = (count: number) => {
@@ -26,7 +35,17 @@ export default function HomeScreen() {
 
     const { logOut } = useSession();
     const [[isLoading, session], setSession] = useStorageState('session');
+
+    const [eventNames, setEventNames] = useState('')
+
+    const [todayEvents, setTodayEvents] = useState<TodayEvent[]>([]);
+
     const userSession = session ? JSON.parse(session) : {}
+
+    useEffect(() => {
+        getTodaysEvent();
+    }, [session]);
+
 
     const openCreateFamilyScreen = () => {
         router.push('/CreateFamilyScreen')
@@ -36,24 +55,22 @@ export default function HomeScreen() {
         router.push('/ViewFamilyScreen')
     }
 
+    const getTodaysEvent = async () => {
+        const { data, error } = await supabase.from('events').select('type,date,children_names').eq('family_id', userSession.familyId);
+        if (error) {
+            console.log(error.message);
+            return;
+        }
+        setTodayEvents(data);
+    }
+
+
     return (
         <ThemedView style={styles.mainContainer}>
             <Grid style={styles.headerContainer} _extra={{
                 className: 'grid-cols-12'
             }}>
-                <GridItem _extra={{
-                    className: 'col-span-4'
-                }}>
-                    <Avatar className='mt-3' size="2xl" >
-                        <AvatarFallbackText>Jane Doe</AvatarFallbackText>
-                        <AvatarImage
-                            source={{
-                                uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-                            }}
-                        />
-                    </Avatar>
-                </GridItem>
-                <GridItem _extra={{
+                {/* <GridItem _extra={{
                     className: 'col-span-8'
                 }}>
                     <VStack className='flex '>
@@ -72,7 +89,7 @@ export default function HomeScreen() {
                             </Button>
                         }
                     </VStack>
-                </GridItem>
+                </GridItem> */}
             </Grid>
             <Grid style={styles.upComingEventsContainer} _extra={{
                 className: 'grid-cols-8'
@@ -96,8 +113,12 @@ export default function HomeScreen() {
 
                                     </View>
                                     <VStack>
-                                        <ThemedText>Dr. Appointment: Brody - 3:30pm</ThemedText>
-                                        <ThemedText>Scholars: Ryan - 1:00pm </ThemedText>
+                                        {todayEvents.length > 0 ? todayEvents.map(event => {
+                                            const time = moment(event.date).format("h:mm A");
+                                            return (<ThemedText key={event.type}>{event.type}: {event?.children_names?.join(', ')}  - {time}</ThemedText>)
+                                        }) :
+                                            <ThemedText>No Events Today!</ThemedText>
+                                        }
                                     </VStack>
                                 </HStack>
 
@@ -192,7 +213,7 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         width: '100%',
-        height: 200,
+        height: 50,
         padding: 15,
         backgroundColor: Colors.light.green
     },

@@ -58,7 +58,7 @@ export default function LoginScreen() {
             return;
         }
 
-        router.replace('/')
+        router.replace('/(app)/(tabs)')
 
     }
 
@@ -71,7 +71,7 @@ export default function LoginScreen() {
                     <Center style={styles.image}>
                         <Image
                             size="2xl"
-                            source={require('../assets/images/logo1.png')}
+                            source={require('../assets/images/logo.png')}
                             alt="image"
                         />
                     </Center>

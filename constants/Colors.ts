@@ -15,8 +15,6 @@ export const Colors = {
         red: '#a63d40',
         blue: '#37718e',
         errorRed: '#c33c54',
-        beige: '#eae0c9',
-        darkBeige: '#c9bda2',
         green: '#5B905B',
         darkGreen: '#3f653f',
         buttonColor: PRIMARY_RED,
@@ -27,7 +25,7 @@ export const Colors = {
     },
     dark: {
         text: '#ECEDEE',
-        background: '#eae0c9',
+        background: '#fff',
         tint: tintColorDark,
         icon: '#9BA1A6',
         tabIconDefault: '#9BA1A6',

@@ -26,7 +26,7 @@ export default function AppLayout() {
 
     // This layout can be deferred because it's not the root layout.
     return (
-        <GluestackUIProvider mode="light">
+        <GluestackUIProvider>
             <SessionProvider>
                 <Stack>
                     <Stack.Screen name="(tabs)" options={{
@@ -38,8 +38,8 @@ export default function AppLayout() {
                     <Stack.Screen name="CreateFamilyScreen" options={{
                         headerShown: true,
                         headerTitle: 'Create Your Family',
-                        headerTintColor:'#fff',
-                        headerBackTitle:'Back',
+                        headerTintColor: '#fff',
+                        headerBackTitle: 'Back',
                         headerStyle: {
                             backgroundColor: Colors.light.green
                         },
@@ -51,14 +51,28 @@ export default function AppLayout() {
                         contentStyle: {
                             backgroundColor: '#fff'
                         },
-                        headerTintColor:'#fff',
-                        headerBackTitle:'Back',
+                        headerTintColor: '#fff',
+                        headerBackTitle: 'Back',
                         headerShown: true,
                         headerTitle: 'View Your Family',
                         headerStyle: {
                             backgroundColor: Colors.light.green
                         }
                     }} />
+
+                    <Stack.Screen name="CreateEventScreen" options={{
+                        headerShown: true,
+                        headerTitle: 'Create Your Event',
+                        headerTintColor: '#fff',
+                        headerBackTitle: 'Back',
+                        headerStyle: {
+                            backgroundColor: Colors.light.green
+                        },
+                        contentStyle: {
+                            backgroundColor: '#fff'
+                        },
+                    }} />
+
                 </Stack>
             </SessionProvider>
         </GluestackUIProvider>
