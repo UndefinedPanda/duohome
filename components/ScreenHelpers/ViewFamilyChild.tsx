@@ -1,22 +1,22 @@
-import { useState } from "react";
-import { SafeAreaView } from "react-native";
-import { ThemedView } from "../ThemedView";
-import { FormControl, FormControlLabel, FormControlLabelText, FormControlError, FormControlErrorText } from "../ui/form-control";
-import { HStack } from "../ui/hstack";
-import { Input, InputField } from "../ui/input";
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { StyleSheet } from "react-native";
+import { useState } from "react"
+import { SafeAreaView } from "react-native"
+import { ThemedView } from "../ThemedView"
+import { FormControl, FormControlLabel, FormControlLabelText, FormControlError, FormControlErrorText } from "../ui/form-control"
+import { HStack } from "../ui/hstack"
+import { Input, InputField } from "../ui/input"
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { StyleSheet } from "react-native"
 
 type ChildProps = {
-    name: string;
+    name: string
     birthday: string,
 }
 
 export default function ViewFamilyChild(props: ChildProps) {
 
-    const [isInvalid, setIsInvalid] = useState(false);
-    const [show, setShow] = useState(false);
-    const [childBirthday, setChildBirthday] = useState(props.birthday);
+    const [isInvalid, setIsInvalid] = useState(false)
+    const [show, setShow] = useState(false)
+    const [childBirthday, setChildBirthday] = useState(props.birthday)
 
     return (
         <ThemedView>
@@ -67,7 +67,7 @@ export default function ViewFamilyChild(props: ChildProps) {
                 </HStack>
             </SafeAreaView>
         </ThemedView>
-    );
+    )
 }
 
 const styles = StyleSheet.create({
@@ -75,5 +75,5 @@ const styles = StyleSheet.create({
         marginTop: 3,
         marginLeft: -15
     }
-});
+})
 

@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { StyleSheet, Alert, View, Text, TouchableOpacity, Button } from 'react-native';
+import React, { useCallback } from 'react'
+import { StyleSheet, Alert, View, Text, TouchableOpacity, Button } from 'react-native'
 
 const testIds = {
     menu: {
@@ -27,29 +27,29 @@ const testIds = {
     },
     expandableCalendar: {CONTAINER: 'expandableCalendar'},
     weekCalendar: {CONTAINER: 'weekCalendar'}
-};
+}
 
 interface ItemProps {
-    item: any;
+    item: any
 }
 
 const AgendaItem = (props: ItemProps) => {
-    const {item} = props;
+    const {item} = props
 
     const buttonPressed = useCallback(() => {
-        Alert.alert('Show me more');
-    }, []);
+        Alert.alert('Show me more')
+    }, [])
 
     const itemPressed = useCallback(() => {
-        Alert.alert(item.title);
-    }, []);
+        Alert.alert(item.title)
+    }, [])
 
     if (item === undefined) {
         return (
             <View style={styles.emptyItem}>
                 <Text style={styles.emptyItemText}>No Events Planned Today</Text>
             </View>
-        );
+        )
     }
 
     return (
@@ -66,10 +66,10 @@ const AgendaItem = (props: ItemProps) => {
                 <Button color={'grey'} title={'Info'} onPress={buttonPressed}/>
             </View>
         </TouchableOpacity>
-    );
-};
+    )
+}
 
-export default React.memo(AgendaItem);
+export default React.memo(AgendaItem)
 
 
 const styles = StyleSheet.create({
@@ -115,4 +115,4 @@ const styles = StyleSheet.create({
         color: 'lightgrey',
         fontSize: 14
     }
-});
+})

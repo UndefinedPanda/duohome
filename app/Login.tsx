@@ -1,6 +1,6 @@
-import { Link, router } from 'expo-router';
-import { useSession } from './AuthContext';
-import { VStack } from '@/components/ui/vstack';
+import { Link, router } from 'expo-router'
+import { useSession } from './AuthContext'
+import { VStack } from '@/components/ui/vstack'
 import {
     FormControl, FormControlError, FormControlErrorText,
     FormControlHelper,
@@ -19,10 +19,10 @@ import { ThemedText } from '@/components/ThemedText'
 
 export default function LoginScreen() {
 
-    const MIN_EMAIL_PASSWORD_SIZE = 6;
+    const MIN_EMAIL_PASSWORD_SIZE = 6
     const ERROR_MESSAGE_TIMEOUT = 5000
 
-    const { login } = useSession();
+    const { login } = useSession()
 
     const [isInvalid, setIsInvalid] = useState(false)
     const [email, setEmail] = useState("")
@@ -52,10 +52,10 @@ export default function LoginScreen() {
             setIsInvalid(false)
         }
 
-        const { loggedIn, errorMessage } = await login(email, password);
+        const { loggedIn, errorMessage } = await login(email, password)
         if (!loggedIn) {
             setErrorMessage(errorMessage)
-            return;
+            return
         }
 
         router.replace('/(app)/(tabs)')
@@ -152,7 +152,7 @@ export default function LoginScreen() {
                 </VStack>
             </Center>
         </KeyboardAwareScrollView>
-    );
+    )
 
 }
 
@@ -168,5 +168,5 @@ const styles = StyleSheet.create({
     errorMessage: {
         color: '#ff0000'
     }
-});
+})
 

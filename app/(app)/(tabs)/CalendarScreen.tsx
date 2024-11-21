@@ -1,76 +1,139 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
-import { Calendar, CalendarUtils } from 'react-native-calendars';
+import React, { useState, useRef, useEffect } from 'react'
+import { StyleSheet, View, ScrollView } from 'react-native'
+import { Calendar, CalendarUtils } from 'react-native-calendars'
 
-import CalendarKit from '@howljs/calendar-kit';
-import { ThemedView } from '@/components/ThemedView';
+import CalendarKit, { EventItem } from '@howljs/calendar-kit'
+import { ThemedView } from '@/components/ThemedView'
+import { UserSession, useSession } from '@/app/AuthContext'
+import { supabase } from '@/lib/Supabase'
+import { Spinner } from '@/components/ui/spinner'
+import { Colors } from 'react-native/Libraries/NewAppScreen'
 
-
-const TODAYS_DATE = CalendarUtils.getCalendarDateString(new Date());
+const TODAYS_DATE = CalendarUtils.getCalendarDateString(new Date())
 
 export default function CalendarScreen() {
 
     const getDate = (count: number) => {
-        const date = new Date(TODAYS_DATE);
-        const newDate = date.setDate(date.getDate() + count);
-        return CalendarUtils.getCalendarDateString(newDate);
-    };
+        const date = new Date(TODAYS_DATE)
+        const newDate = date.setDate(date.getDate() + count)
+        return CalendarUtils.getCalendarDateString(newDate)
+    }
 
-    const [selectedDate, setSelectedDate] = useState(TODAYS_DATE);
+    const { session } = useSession()
+    const userSession: UserSession = session ? JSON.parse(session) : {}
+    const [markedDates, setMarkedDates] = useState<any>({})
+    const [selectedDate, setSelectedDate] = useState(TODAYS_DATE)
+    const [eventItems, setEventItems] = useState<EventItem[]>([]);
 
+    const [isLoading, setIsLoading] = useState(true);
 
-    const calendarRef = useRef(null);
-    const calendarViewRef = useRef(null);
+    const calendarRef = useRef(null)
+    const calendarViewRef = useRef(null)
 
     const onCalendarDayPressed = async (day: { dateString: string }) => {
-        setSelectedDate(day.dateString);
+        setSelectedDate(day.dateString)
     }
 
     useEffect(() => {
         //@ts-ignore
-        calendarRef.current?.setVisibleDate(selectedDate);
-        //@ts-ignore
         calendarRef.current?.goToDate({
             date: selectedDate
-        });
+        })
         //@ts-ignore
-        calendarRef.current?.goToHour(0,true);
+        calendarRef.current?.goToHour(0, true)
+        //@ts-ignore
+        calendarRef.current?.setVisibleDate(selectedDate)
     }, [selectedDate])
+
+    useEffect(() => {
+        if (!session) return
+        getEvents().then(() => setIsLoading(false))
+    }, [])
+
+    const getEvents = async () => {
+        const { data, error } = await supabase.from('events').select('*').eq('family_id', userSession.familyId)
+        if (error) {
+            console.log(error.message)
+            setIsLoading(false)
+            return
+        }
+
+        if (!data) return
+
+        const checkedDates: any = []
+
+        const preparedMarkedDates: any = {}
+        const events: EventItem[] = []
+
+        for (let i = 0; i < data.length; i++) {
+
+            const eventStart = new Date(data[i].date + 'T' + data[i].time);
+            const addedHour = 60 * 60 * 1000
+            const eventEnd = new Date(eventStart.getTime() + addedHour)
+
+            console.log(eventStart.toISOString().split('.')[0]+'Z')
+
+            const event = {
+                id: data[i].id,
+                title: data[i].description,
+                start: { dateTime: eventStart.toISOString().split('.')[0]+'Z' },
+                end: { dateTime: eventEnd.toISOString().split('.')[0]+'Z' },
+                color: data[i].marker_colour,
+            }
+
+            events.push(event);
+
+            if (checkedDates.includes(data[i].date)) {
+                continue
+            }
+
+            const date = data[i].date
+            const sameDates = []
+
+            for (let j = 0; j < data.length; j++) {
+                if (data[i].id !== data[j].id && date === data[j].date) {
+                    // console.log(' --- Same Date ' + data[j].date + 'Date ID ' + data[j].id)
+                    sameDates.push(data[j])
+
+                }
+                checkedDates.push(date);
+            }
+
+
+            const dots = [{ key: data[i].type, color: data[i].marker_colour }]
+            sameDates.forEach(date => dots.push({ key: date.type, color: date.marker_colour }))
+            preparedMarkedDates[date] = {
+                dots,
+            }
+        }
+        setEventItems(events)
+        setMarkedDates(preparedMarkedDates)
+    }
 
     return (
         <ThemedView style={styles.container}>
-            <Calendar
-                minDate={getDate(-14)}
-                markingType={'multi-dot'}
-                markedDates={{
-                    [getDate(10)]: {
-                        color: '#70d7c7',
-                        customTextStyle: {
-                            color: '#FFFAAA',
-                            fontWeight: '700'
-                        },
-                        dots: [
-                            { key: 'vacation', color: 'blue', selectedDotColor: 'red' },
-                            { key: 'massage', color: 'red', selectedDotColor: 'white' }
-                        ]
-                    },
+            {isLoading ? <Spinner size="large" color={Colors.light.green} /> :
+                (<View>
+                    <Calendar
+                        minDate={getDate(-1)}
+                        markingType={'multi-dot'}
+                        markedDates={markedDates}
+                        // theme={{
+                        //     textInactiveColor: '#a68a9f',
+                        //     textSectionTitleDisabledColor: 'grey',
+                        //     textSectionTitleColor: '#319e8e',
+                        //     arrowColor: '#319e8e'
+                        // }}
+                        onDayPress={(day: { dateString: any }) => onCalendarDayPressed(day)}
+                    />
+                    <View style={styles.timeline} ref={calendarViewRef}>
+                        <CalendarKit events={eventItems} hourFormat="h:mm a" ref={calendarRef} numberOfDays={1} scrollToNow={false} />
+                    </View>
+                </View>)}
 
-                }}
-                // theme={{
-                //     textInactiveColor: '#a68a9f',
-                //     textSectionTitleDisabledColor: 'grey',
-                //     textSectionTitleColor: '#319e8e',
-                //     arrowColor: '#319e8e'
-                // }}
-                onDayPress={(day: { dateString: any; }) => onCalendarDayPressed(day)}
-            />
-            {/* //TODO: Make this a seperate component  */}
-            <View style={styles.timeline} ref={calendarViewRef}>
-                <CalendarKit ref={calendarRef} numberOfDays={1} scrollToNow={false}/>
-            </View>
         </ThemedView>
-    );
-};
+    )
+}
 
 
 const styles = StyleSheet.create({
@@ -120,4 +183,4 @@ const styles = StyleSheet.create({
     //     fontWeight: 'bold',
     //     color: '#00BBF2'
     // }
-});
+})

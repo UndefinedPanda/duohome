@@ -1,43 +1,43 @@
-import { Link, router } from 'expo-router';
-import { useSession } from './AuthContext';
-import { VStack } from '@/components/ui/vstack';
+import { Link, router } from 'expo-router'
+import { useSession } from './AuthContext'
+import { VStack } from '@/components/ui/vstack'
 import {
     FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText,
     FormControlHelper,
     FormControlHelperText,
     FormControlLabel,
     FormControlLabelText
-} from '@/components/ui/form-control';
-import React, { useEffect, useState } from 'react';
-import { Input, InputField } from '@/components/ui/input';
-import { Button, ButtonText } from '@/components/ui/button';
-import { Center } from '@/components/ui/center';
-import { Image } from '@/components/ui/image';
-import { StyleSheet } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { ThemedText } from '@/components/ThemedText';
-import { supabase } from '@/lib/Supabase';
-import { ThemedView } from '@/components/ThemedView';
+} from '@/components/ui/form-control'
+import React, { useEffect, useState } from 'react'
+import { Input, InputField } from '@/components/ui/input'
+import { Button, ButtonText } from '@/components/ui/button'
+import { Center } from '@/components/ui/center'
+import { Image } from '@/components/ui/image'
+import { StyleSheet } from 'react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { ThemedText } from '@/components/ThemedText'
+import { supabase } from '@/lib/Supabase'
+import { ThemedView } from '@/components/ThemedView'
 
 export default function RegisterScreen() {
     const ERROR_MESSAGE_TIMEOUT = 10000
-    const MIN_NAME_LENGTH = 2;
-    const MIN_PASSWORD_LENGTH = 6;
-    const MIN_EMAIL_LENGTH = 6;
+    const MIN_NAME_LENGTH = 2
+    const MIN_PASSWORD_LENGTH = 6
+    const MIN_EMAIL_LENGTH = 6
 
-    const { register } = useSession();
+    const { register } = useSession()
 
-    const [isInvalid, setIsInvalid] = useState(false);
-    const [email, setEmail] = useState("");
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    const [isInvalid, setIsInvalid] = useState(false)
+    const [email, setEmail] = useState("")
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
 
-    const [emailErrorMessage, setEmailErrorMessage] = useState("");
-    const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-    const [firstNameErrorMessage, setFirstNameErrorMessage] = useState("");
-    const [lastNameErrorMessage, setLastNameErrorMessage] = useState("");
+    const [emailErrorMessage, setEmailErrorMessage] = useState("")
+    const [passwordErrorMessage, setPasswordErrorMessage] = useState("")
+    const [firstNameErrorMessage, setFirstNameErrorMessage] = useState("")
+    const [lastNameErrorMessage, setLastNameErrorMessage] = useState("")
 
     useEffect(() => {
         setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT)
@@ -61,11 +61,11 @@ export default function RegisterScreen() {
 
     const handleSubmit = async () => {
         if (!checkUserInput()) {
-            const { registered, errorMessage } = await register(email, firstName, lastName, password);
+            const { registered, errorMessage } = await register(email, firstName, lastName, password)
 
             if (!registered) {
                 setEmailErrorMessage(errorMessage)
-                return;
+                return
             }
             router.replace('/(app)/(tabs)')
         }
@@ -74,34 +74,34 @@ export default function RegisterScreen() {
     const checkUserInput = () => {
         if (!email?.includes("@")) {
             setEmailErrorMessage("Email must be a valid email address")
-            setIsInvalid(true);
+            setIsInvalid(true)
         }
         if (email?.length < MIN_EMAIL_LENGTH) {
             setEmailErrorMessage("Email must be longer than 6 characters")
-            setIsInvalid(true);
+            setIsInvalid(true)
         }
         if (firstName?.length < MIN_NAME_LENGTH) {
             setFirstNameErrorMessage("First Name must be greater than 2 characters")
-            setIsInvalid(true);
+            setIsInvalid(true)
         }
         if (lastName?.length < MIN_NAME_LENGTH) {
             setLastNameErrorMessage("Last Name must be greater than 2 characters")
-            setIsInvalid(true);
+            setIsInvalid(true)
         }
         if (password?.length < MIN_PASSWORD_LENGTH) {
-            setPasswordErrorMessage("Password must be greater than 6 characters");
-            setIsInvalid(true);
+            setPasswordErrorMessage("Password must be greater than 6 characters")
+            setIsInvalid(true)
         }
         if (confirmPassword?.length < MIN_PASSWORD_LENGTH) {
-            setPasswordErrorMessage("Password must be greater than 6 characters");
-            setIsInvalid(true);
+            setPasswordErrorMessage("Password must be greater than 6 characters")
+            setIsInvalid(true)
         }
         if (password !== confirmPassword) {
-            setPasswordErrorMessage("Password and Confirm Password must match");
-            setIsInvalid(true);
+            setPasswordErrorMessage("Password and Confirm Password must match")
+            setIsInvalid(true)
         }
 
-        return isInvalid;
+        return isInvalid
     }
 
     return (
@@ -262,7 +262,7 @@ export default function RegisterScreen() {
                     </VStack>
                 </Center>
         </KeyboardAwareScrollView>
-    );
+    )
 }
 
 

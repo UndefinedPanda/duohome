@@ -4,7 +4,7 @@ import { useColorScheme } from '@/hooks/useColorScheme'
 import { SessionProvider, useSession } from '../AuthContext'
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/constants/Colors'
 
 export default function AppLayout() {
     const { session, isLoading } = useSession()
@@ -12,7 +12,7 @@ export default function AppLayout() {
 
     // You can keep the splash screen open, or render a loading screen like we do here.
     if (isLoading) {
-        return <Text>Loading...</Text>;
+        return <Text>Loading...</Text>
     }
 
     // Only require authentication within the (app) group's layout as users

@@ -1,5 +1,5 @@
-import { UserSession, useSession } from '../AuthContext';
-import { VStack } from '@/components/ui/vstack';
+import { UserSession, useSession } from '../AuthContext'
+import { VStack } from '@/components/ui/vstack'
 import {
     FormControl, FormControlError, FormControlErrorText,
     FormControlLabel,
@@ -12,12 +12,12 @@ import { Center } from '@/components/ui/center'
 import { Alert, StyleSheet } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { ThemedText } from '@/components/ThemedText'
-import { Colors } from '@/constants/Colors';
-import { router } from 'expo-router';
-import { supabase } from '@/lib/Supabase';
-import { useStorageState } from '@/app/UseStorageState';
-import ViewFamilyChild from '@/components/ScreenHelpers/ViewFamilyChild';
-import { Spinner } from '@/components/ui/spinner';
+import { Colors } from '@/constants/Colors'
+import { router } from 'expo-router'
+import { supabase } from '@/lib/Supabase'
+import { useStorageState } from '@/app/UseStorageState'
+import ViewFamilyChild from '@/components/ScreenHelpers/ViewFamilyChild'
+import { Spinner } from '@/components/ui/spinner'
 
 interface Child {
     name: string,
@@ -26,59 +26,59 @@ interface Child {
 
 export default function CreateFamilyScreen() {
 
-    const ERROR_MESSAGE_TIMEOUT = 5000;
+    const ERROR_MESSAGE_TIMEOUT = 5000
 
-    const { login } = useSession();
+    const { login } = useSession()
 
-    const [errorMessage, setErrorMessage] = useState('');
-    const [isInvalid, setIsInvalid] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('')
+    const [isInvalid, setIsInvalid] = useState(false)
 
-    const [familyName, setFamilyName] = useState('');
-    const [childName, setChildName] = useState('');
-    const [childCreated, setChildCreated] = useState(false);
-    const [childBirthday, setChildBirthday] = useState(new Date(1980, 1, 1));
-    const [children, setChildren] = useState<Child[]>([]);
+    const [familyName, setFamilyName] = useState('')
+    const [childName, setChildName] = useState('')
+    const [childCreated, setChildCreated] = useState(false)
+    const [childBirthday, setChildBirthday] = useState(new Date(1980, 1, 1))
+    const [children, setChildren] = useState<Child[]>([])
     const [parentType, setParentType] = useState('')
 
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(false)
 
-    const [isLoadingFamily, setIsLoadingFamily] = useState(true);
+    const [isLoadingFamily, setIsLoadingFamily] = useState(true)
 
-    const [[isLoading, session], setSession] = useStorageState('session');
+    const [[isLoading, session], setSession] = useStorageState('session')
     const userSession = session ? JSON.parse(session) : {}
 
     useEffect(() => {
-        setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT);
+        setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT)
 
         if (!isLoading) {
-            getFamilyFromDatabase().then(() => setIsLoadingFamily(false));
+            getFamilyFromDatabase().then(() => setIsLoadingFamily(false))
         }
 
 
-    }, [isInvalid, session]);
+    }, [isInvalid, session])
 
     const getFamilyFromDatabase = async () => {
-        const { data: family, error } = await supabase.from('families').select('name,id').eq('id', userSession.familyId).limit(1).single();
+        const { data: family, error } = await supabase.from('families').select('name,id').eq('id', userSession.familyId).limit(1).single()
         if (error) {
             console.error(error)
         }
 
-        if (family) setFamilyName(family.name);
+        if (family) setFamilyName(family.name)
 
         const { data: childrenData, error: childrenError } = await supabase.from('children').select('name,birthday').eq('family_id', family?.id)
-        if (childrenData) setChildren(childrenData);
+        if (childrenData) setChildren(childrenData)
 
     }
 
     const onChange = (event: any, selectedDate: any) => {
-        const currentDate = new Date(selectedDate);
-        setShow(false);
-        setChildBirthday(currentDate);
+        const currentDate = new Date(selectedDate)
+        setShow(false)
+        setChildBirthday(currentDate)
         console.log(currentDate)
-    };
+    }
 
     const onFamilyNameChange = (name: string) => {
-        setFamilyName(name);
+        setFamilyName(name)
     }
 
 
@@ -125,7 +125,7 @@ export default function CreateFamilyScreen() {
                 </VStack>
             </Center>
         </KeyboardAwareScrollView>
-    );
+    )
 
 }
 
@@ -162,5 +162,5 @@ const styles = StyleSheet.create({
         marginTop: 3,
         marginLeft: -15
     }
-});
+})
 

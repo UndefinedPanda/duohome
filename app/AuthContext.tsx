@@ -1,36 +1,36 @@
-import { useContext, createContext, type PropsWithChildren, useEffect } from 'react';
-import { useStorageState } from './UseStorageState';
+import { useContext, createContext, type PropsWithChildren, useEffect } from 'react'
+import { useStorageState } from './UseStorageState'
 import { router } from 'expo-router'
-import { supabase } from '@/lib/Supabase';
+import { supabase } from '@/lib/Supabase'
 
 // TODO: CLEAN UP THIS FILE -
 // TODO: CREATE ERROR TYPE AND RETURN THAT INSTEAD OF SHIT
 // TODO: REMOVE ALL FUNCTIONALITY FROM THE AUTH CONTEXT REGISTER AND LOGIN FUNCTIONS TO THEIR OWN SEPARATE METHOD FUNCTIONS
 
 type RegisterError = {
-    error: boolean;
-    message: string;
+    error: boolean
+    message: string
 }
 
 type UserPreferences = {}
 
 export type UserSession = {
-    userId: string;
-    familyId?: number | undefined | null;
-    firstName: string | undefined | null;
-    lastName?: string | undefined | null;
-    premiumUser?: boolean | undefined | null;
-    premiumFamily?: boolean | undefined | null;
-    userPreferences?: UserPreferences | undefined | null;
+    userId: string
+    familyId?: number | undefined | null
+    firstName: string | undefined | null
+    lastName?: string | undefined | null
+    premiumUser?: boolean | undefined | null
+    premiumFamily?: boolean | undefined | null
+    userPreferences?: UserPreferences | undefined | null
 }
 
 const AuthContext = createContext<{
-    register: (email: string, firstName: string, lastName: string, password: string) => any;
-    login: (email: string, password: string) => any;
-    logOut: () => void;
-    session?: string | undefined | null;
-    setUserSession?: (oldSession: UserSession) => void;
-    isLoading: boolean;
+    register: (email: string, firstName: string, lastName: string, password: string) => any
+    login: (email: string, password: string) => any
+    logOut: () => void
+    session?: string | undefined | null
+    setUserSession?: (oldSession: UserSession) => void
+    isLoading: boolean
 }>({
     register: async (email: string, firstName: string, lastName: string, password: string) => null,
     login: async (email: string, password: string) => null,
@@ -38,23 +38,23 @@ const AuthContext = createContext<{
     session: null,
     setUserSession: () => null,
     isLoading: false
-});
+})
 
 // This hook can be used to access the user info.
 export function useSession() {
-    const value = useContext(AuthContext);
+    const value = useContext(AuthContext)
     if (process.env.NODE_ENV !== 'production') {
         if (!value) {
-            throw new Error('useSession must be wrapped in a <SessionProvider />');
+            throw new Error('useSession must be wrapped in a <SessionProvider />')
         }
     }
 
-    return value;
+    return value
 }
 
 export function SessionProvider({children}: PropsWithChildren) {
 
-    const [[isLoading, session], setSession] = useStorageState('session');
+    const [[isLoading, session], setSession] = useStorageState('session')
 
     useEffect(() => {
 
@@ -68,31 +68,31 @@ export function SessionProvider({children}: PropsWithChildren) {
                     first_name: firstName
                 }
             }
-        });
+        })
 
         if (error) {
-            console.log(error.message);
-            return {registered: false, errorMessage: error.message};
+            console.log(error.message)
+            return {registered: false, errorMessage: error.message}
         }
 
-        return {registered: true, errorMessage: ''};
+        return {registered: true, errorMessage: ''}
     }
 
     const loginUser = async (email: string, password: string) => {
-        const {data: {user}, error} = await supabase.auth.signInWithPassword({email, password});
+        const {data: {user}, error} = await supabase.auth.signInWithPassword({email, password})
         if (error) {
-            console.log(error.message);
-            return {loggedIn: false, errorMessage: error.message};
+            console.log(error.message)
+            return {loggedIn: false, errorMessage: error.message}
         }
 
-        const userInformation = await getUserInformation(user);
+        const userInformation = await getUserInformation(user)
 
         if (userInformation.error) {
-            console.log(userInformation.errorMessage);
-            return {loggedIn: false, errorMessage: userInformation.errorMessage};
+            console.log(userInformation.errorMessage)
+            return {loggedIn: false, errorMessage: userInformation.errorMessage}
         }
 
-        return {user, loggedIn: true, errorMessage: ''};
+        return {user, loggedIn: true, errorMessage: ''}
     }
 
     const getUserInformation = async (user: any) => {
@@ -101,7 +101,7 @@ export function SessionProvider({children}: PropsWithChildren) {
         const {
             data: family_parent,
             error
-        } = await supabase.from('family_parent').select('*').eq('parent_id', user.id).limit(1);
+        } = await supabase.from('family_parent').select('*').eq('parent_id', user.id).limit(1)
 
         if (error) {
             return {
@@ -119,8 +119,8 @@ export function SessionProvider({children}: PropsWithChildren) {
             familyId: family_parent[0]?.family_id
         }
 
-        const sessionString = JSON.stringify(userSession);
-        setSession(sessionString);
+        const sessionString = JSON.stringify(userSession)
+        setSession(sessionString)
         return {
             error: false,
             errorMessage: ''
@@ -131,7 +131,7 @@ export function SessionProvider({children}: PropsWithChildren) {
         <AuthContext.Provider
             value={ {
                 register: async (email, firstName, lastName, password) => {
-                    const {registered, errorMessage} = await registerUser(email, password, firstName);
+                    const {registered, errorMessage} = await registerUser(email, password, firstName)
 
                     if (!registered) {
                         return {
@@ -142,7 +142,7 @@ export function SessionProvider({children}: PropsWithChildren) {
 
                     const {data, error} = await supabase.from('parents').insert([{
                         email, first_name: firstName, last_name: lastName
-                    }]).select().limit(1).single();
+                    }]).select().limit(1).single()
 
                     if (error) {
                         return {
@@ -157,8 +157,8 @@ export function SessionProvider({children}: PropsWithChildren) {
                         firstName
                     }
 
-                    const sessionString = JSON.stringify(userSession);
-                    setSession(sessionString);
+                    const sessionString = JSON.stringify(userSession)
+                    setSession(sessionString)
 
                     return {
                         registered: true,
@@ -166,7 +166,7 @@ export function SessionProvider({children}: PropsWithChildren) {
                     }
                 },
                 login: async (email: string, password: string) => {
-                    const {user, loggedIn, errorMessage} = await loginUser(email, password);
+                    const {user, loggedIn, errorMessage} = await loginUser(email, password)
                     if (!loggedIn) return {loggedIn, errorMessage}
                     if (!user) return {
                         loggedIn: false,
@@ -176,7 +176,7 @@ export function SessionProvider({children}: PropsWithChildren) {
                     return {loggedIn, errorMessage: ''}
                 },
                 logOut: () => {
-                    setSession(null);
+                    setSession(null)
                     router.replace('/Login')
                 },
                 session,
@@ -184,5 +184,5 @@ export function SessionProvider({children}: PropsWithChildren) {
             } }>
             { children }
         </AuthContext.Provider>
-    );
+    )
 }

@@ -1,20 +1,16 @@
-import { Tabs, router } from 'expo-router';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs, router } from 'expo-router'
+import { TabBarIcon } from '@/components/navigation/TabBarIcon'
+import { Colors } from '@/constants/Colors'
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
-import { Button } from '@/components/ui/button';
-import { Text } from '@/components/ui/text';
-import { UserSession, useSession } from '@/app/AuthContext';
-import { AddIcon, ArrowRightIcon, Icon } from '@/components/ui/icon';
-import { TouchableOpacity, View } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { HStack } from '@/components/ui/hstack';
-import { Ionicons } from '@expo/vector-icons';
+import { Text } from '@/components/ui/text'
+import { AddIcon, ArrowRightIcon, Icon } from '@/components/ui/icon'
+import { TouchableOpacity, View } from 'react-native'
+import { HStack } from '@/components/ui/hstack'
+import { Ionicons } from '@expo/vector-icons'
+import { useSession } from '@/app/AuthContext'
 
 export default function TabLayout() {
-    const { session } = useSession();
-    const userSession: UserSession = session ? JSON.parse(session) : undefined;
+    const { logOut } = useSession()
 
     return (
         <GluestackUIProvider>
@@ -44,14 +40,14 @@ export default function TabLayout() {
                         headerTitle: ``,
                         headerStatusBarHeight: 50,
                         headerRight: () => (
-                            <TouchableOpacity onPress={() => router.push('/(app)/CreateEventScreen')} className='mr-3'>
+                            <TouchableOpacity onPress={() => logOut()} className='mr-3'>
                                 <HStack>
                                     <Ionicons name="log-out-outline" size={32} color="white" />
                                 </HStack>
                             </TouchableOpacity>
                         ),
                         headerLeft: () => (
-                            <TouchableOpacity onPress={() => router.push('/(app)/CreateEventScreen')} className='ml-3'>
+                            <TouchableOpacity onPress={() => router.push('/(app)/ViewFamilyScreen')} className='ml-3'>
                                 <HStack>
                                     <Ionicons name="people-outline" size={32} color="white" />
                                 </HStack>
@@ -86,5 +82,5 @@ export default function TabLayout() {
                 />
             </Tabs>
         </GluestackUIProvider>
-    );
+    )
 }

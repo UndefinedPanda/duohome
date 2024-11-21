@@ -1,6 +1,6 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { UserSession, useSession } from '../AuthContext';
-import { VStack } from '@/components/ui/vstack';
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { UserSession, useSession } from '../AuthContext'
+import { VStack } from '@/components/ui/vstack'
 import {
     FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText,
     FormControlLabel,
@@ -11,8 +11,8 @@ import { Center } from '@/components/ui/center'
 import { Alert, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { ThemedText } from '@/components/ThemedText'
-import { Colors } from '@/constants/Colors';
-import { HStack } from '@/components/ui/hstack';
+import { Colors } from '@/constants/Colors'
+import { HStack } from '@/components/ui/hstack'
 import {
     Select,
     SelectBackdrop,
@@ -21,15 +21,15 @@ import {
     SelectInput, SelectItem,
     SelectPortal,
     SelectTrigger
-} from '@/components/ui/select';
-import { AlertCircleIcon, CheckIcon, ChevronDownIcon } from '@/components/ui/icon';
-import { setStorageItemAsync, useStorageState } from '@/app/UseStorageState';
-import { Textarea, TextareaInput } from '@/components/ui/textarea';
-import { Checkbox, CheckboxGroup, CheckboxIcon, CheckboxIndicator, CheckboxLabel } from '@/components/ui/checkbox';
-import { supabase } from '@/lib/Supabase';
-import Button from '@/components/Button';
-import moment, { Moment } from 'moment';
-import { router } from 'expo-router';
+} from '@/components/ui/select'
+import { AlertCircleIcon, CheckIcon, ChevronDownIcon } from '@/components/ui/icon'
+import { setStorageItemAsync, useStorageState } from '@/app/UseStorageState'
+import { Textarea, TextareaInput } from '@/components/ui/textarea'
+import { Checkbox, CheckboxGroup, CheckboxIcon, CheckboxIndicator, CheckboxLabel } from '@/components/ui/checkbox'
+import { supabase } from '@/lib/Supabase'
+import Button from '@/components/Button'
+import moment, { Moment } from 'moment'
+import { router } from 'expo-router'
 
 interface Child {
     id: number,
@@ -40,46 +40,47 @@ interface Child {
 
 export default function CreateEventScreen() {
 
-    const ERROR_MESSAGE_TIMEOUT = 5000;
+    const ERROR_MESSAGE_TIMEOUT = 5000
 
 
-    const [isInvalid, setIsInvalid] = useState<boolean>(false);
+    const [isInvalid, setIsInvalid] = useState<boolean>(false)
 
-    const [selectedChildren, setSelectedChildren] = useState<string[]>([]);
+    const [selectedChildren, setSelectedChildren] = useState<string[]>([])
 
-    const [eventType, setEventType] = useState<string>('');
-    const [markerColour, setMarkerColour] = useState<string>('');
-    const [eventDate, setEventDate] = useState<Date>(new Date());
-    const [description, setDescription] = useState<string>('');
+    const [eventType, setEventType] = useState<string>('')
+    const [markerColour, setMarkerColour] = useState<string>('')
+    const [eventDate, setEventDate] = useState<Date>(new Date())
+    const [description, setDescription] = useState<string>('')
 
-    const [children, setChildren] = useState<Child[]>([]);
+    const [children, setChildren] = useState<Child[]>([])
 
-    const [[isLoading, session], setSession] = useStorageState('session');
+    const { session } = useSession()
     const userSession: UserSession = session ? JSON.parse(session) : {}
 
     useEffect(() => {
-        setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT);
-        if (!isLoading) getChildren().then((data) => setChildren(data));
-    }, [isInvalid, session]);
+        setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT)
+        if (session) getChildren().then((data) => setChildren(data))
+    }, [isInvalid, session])
 
     const onDateTimeChange = (event: any, selectedDate: any) => {
-        setEventDate(selectedDate);
-    };
+        setEventDate(selectedDate)
+    }
+
 
     const getChildren = async () => {
         const { data, error } = await supabase.from('children').select('id,name').eq('family_id', userSession.familyId)
         if (error) {
-            console.log(error.message);
-            return [];
+            console.log(error.message)
+            return []
         }
-        return data;
+        return data
     }
 
     const createEvent = async () => {
 
-        const originalDate = new Date();
+        const originalDate = new Date()
 
-        let names = [];
+        let names = []
 
         if (selectedChildren.length < 1) {
             Alert.alert('Must select at least one child')
@@ -88,29 +89,32 @@ export default function CreateEventScreen() {
 
         if (!eventType) {
             Alert.alert('Must select an event / appointment type')
-            return;
+            return
         }
         if (!markerColour) {
             Alert.alert('Must select an calendar marker colour')
             return
         }
 
-        if (eventDate.getDate() === originalDate.getDate()) {
+        if (eventDate.toISOString() === originalDate.toISOString()) {
             Alert.alert('Must select a date in the future')
-            return;
+            return
         }
 
         if (!description) {
             Alert.alert('Must add a brief description')
-            return;
+            return
         }
 
         // get children names
         for (const child of selectedChildren) {
-            const { data, error } = await supabase.from('children').select('name').eq('id', child).single();
-            if(error) console.log(error);
-            names.push(data?.name);
+            const { data, error } = await supabase.from('children').select('name').eq('id', child).single()
+            if (error) console.log(error)
+            names.push(data?.name)
         }
+
+        const date = eventDate.toISOString().split('T')[0]
+        const time = eventDate.toISOString().split('T')[1]
 
         const { data, error } = await supabase.from('events').insert([
             {
@@ -118,18 +122,20 @@ export default function CreateEventScreen() {
                 family_id: userSession.familyId,
                 children_names: names,
                 type: eventType,
-                date: eventDate,
+                date,
+                time,
                 description,
+                marker_colour: markerColour
             }
-        ]).select();
+        ]).select()
 
         if (error) {
-            Alert.alert('There was an error creating this event. Please try again');
-            console.log(error.message);
-            return;
+            Alert.alert('There was an error creating this event. Please try again')
+            console.log(error?.message)
+            return
         }
 
-        console.log(data);
+        console.log(data)
 
         Alert.alert('Successfully Created This Event!!')
 
@@ -152,7 +158,7 @@ export default function CreateEventScreen() {
                             value={selectedChildren}
 
                             onChange={(keys) => {
-                                console.log(keys);
+                                console.log(keys)
                                 setSelectedChildren(keys)
                             }}
                         >
@@ -240,29 +246,29 @@ export default function CreateEventScreen() {
                             <SelectPortal>
                                 <SelectBackdrop />
                                 <SelectContent style={styles.selectContent}>
-                                    <SelectItem key="01" label="Red" value="doctor" textStyle={{
+                                    <SelectItem key="01" label="Red" value="#E3170A" textStyle={{
                                         size: '3xl'
 
                                     }} />
-                                    <SelectItem key="11" label="Green" value="dentist" textStyle={{
+                                    <SelectItem key="11" label="Green" value="#6AB547" textStyle={{
                                         size: '3xl'
                                     }} />
-                                    <SelectItem key="22" label="Blue" value="medical" textStyle={{
+                                    <SelectItem key="22" label="Blue" value="#48ACF0" textStyle={{
                                         size: '3xl'
                                     }} />
-                                    <SelectItem key="33" label="Orange" value="appointment" textStyle={{
+                                    <SelectItem key="33" label="Orange" value="#F15025" textStyle={{
                                         size: '3xl'
                                     }} />
-                                    <SelectItem key="44" label="Indigo" value="school" textStyle={{
+                                    <SelectItem key="44" label="Indigo" value="#2B286F" textStyle={{
                                         size: '3xl'
                                     }} />
-                                    <SelectItem key="55" label="Pink" value="extracurricular" textStyle={{
+                                    <SelectItem key="55" label="Pink" value="#D4399D" textStyle={{
                                         size: '3xl'
                                     }} />
-                                    <SelectItem key="66" label="Yellow" value="sports" textStyle={{
+                                    <SelectItem key="66" label="Yellow" value="#F3D930" textStyle={{
                                         size: '3xl'
                                     }} />
-                                    <SelectItem key="77" label="Fuscia" value="other" textStyle={{
+                                    <SelectItem key="77" label="Fuscia" value="#8B30F3" textStyle={{
                                         size: '3xl'
                                     }} />
                                 </SelectContent>
@@ -327,7 +333,7 @@ export default function CreateEventScreen() {
                 </VStack>
             </Center>
         </KeyboardAwareScrollView>
-    );
+    )
 
 }
 
@@ -367,5 +373,5 @@ const styles = StyleSheet.create({
         marginTop: 3,
         marginLeft: -15
     }
-});
+})
 

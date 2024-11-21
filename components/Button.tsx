@@ -1,14 +1,14 @@
-import React from 'react';
-import { Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
-import { Colors } from '@/constants/Colors';
+import React from 'react'
+import { Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native'
+import { Colors } from '@/constants/Colors'
 
 export default function Button(props: any) {
-    const {onPress, text} = props;
+    const {onPress, text} = props
     return (
         <TouchableOpacity style={ styles.button } onPress={ onPress }>
             <Text style={ styles.text }>{ text }</Text>
         </TouchableOpacity>
-    );
+    )
 }
 
 const styles = StyleSheet.create({
@@ -28,4 +28,4 @@ const styles = StyleSheet.create({
         letterSpacing: 0.25,
         color: 'white'
     }
-});
+})

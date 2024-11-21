@@ -1,67 +1,67 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, ButtonText } from '@/components/ui/button'
 import { useSession } from '@/app/AuthContext'
-import { CalendarUtils } from 'react-native-calendars';
-import { Colors } from '../../../constants/Colors';
-import { ThemedView } from '@/components/ThemedView';
-import { HStack } from '@/components/ui/hstack';
-import { Card } from '@/components/ui/card';
-import { Heading } from '@/components/ui/heading';
-import { Text } from '@/components/ui/text';
-import { Grid, GridItem } from '@/components/ui/grid';
-import { VStack } from '@/components/ui/vstack';
-import { router } from 'expo-router';
-import { useStorageState } from '@/app/UseStorageState';
-import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar';
-import { ThemedText } from '@/components/ThemedText';
-import { supabase } from '@/lib/Supabase';
-import { useEffect, useState } from 'react';
-import moment from 'moment';
+import { CalendarUtils } from 'react-native-calendars'
+import { Colors } from '../../../constants/Colors'
+import { ThemedView } from '@/components/ThemedView'
+import { HStack } from '@/components/ui/hstack'
+import { Card } from '@/components/ui/card'
+import { Heading } from '@/components/ui/heading'
+import { Text } from '@/components/ui/text'
+import { Grid, GridItem } from '@/components/ui/grid'
+import { VStack } from '@/components/ui/vstack'
+import { router } from 'expo-router'
+import { useStorageState } from '@/app/UseStorageState'
+import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar'
+import { ThemedText } from '@/components/ThemedText'
+import { supabase } from '@/lib/Supabase'
+import { useEffect, useState } from 'react'
+import moment from 'moment'
 
-const CARD_SIZE = 'lg';
+const CARD_SIZE = 'lg'
 
 interface TodayEvent {
-    type?: string;
-    date?: string;
+    type?: string
+    date?: string
+    time?: string,
     children_names?: any[]
 }
 
 export default function HomeScreen() {
-    // const getDate = (count: number) => {
-    //     const date = new Date(TODAYS_DATE);
-    //     const newDate = date.setDate(date.getDate() + count);
-    //     return CalendarUtils.getCalendarDateString(newDate);
-    // };
+    const getDate = (count: number) => {
+        const date = new Date()
+        const newDate = date.setDate(date.getDate() + count)
+        return new Date(newDate)
+    }
 
-    const { logOut } = useSession();
-    const [[isLoading, session], setSession] = useStorageState('session');
+    const [todayEvents, setTodayEvents] = useState<TodayEvent[]>([])
 
-    const [eventNames, setEventNames] = useState('')
-
-    const [todayEvents, setTodayEvents] = useState<TodayEvent[]>([]);
-
+    const { session } = useSession()
     const userSession = session ? JSON.parse(session) : {}
 
     useEffect(() => {
-        getTodaysEvent();
-    }, [session]);
+        if (!session) return
+        getTodaysEvent()
+    }, [session])
 
 
     const openCreateFamilyScreen = () => {
         router.push('/CreateFamilyScreen')
     }
 
-    const openViewFamilyScreen = () => {
-        router.push('/ViewFamilyScreen')
-    }
-
     const getTodaysEvent = async () => {
-        const { data, error } = await supabase.from('events').select('type,date,children_names').eq('family_id', userSession.familyId);
+
+        const today = getDate(0).toISOString().split('T')[0]
+
+        const { data, error } = await supabase.from('events').select('type,date,time,children_names').eq('family_id', userSession.familyId)
+            .eq('date', today)
+
         if (error) {
-            console.log(error.message);
-            return;
+            console.error(error.message)
+            return
         }
-        setTodayEvents(data);
+        console.log(data)
+        setTodayEvents(data)
     }
 
 
@@ -107,23 +107,19 @@ export default function HomeScreen() {
                             </Heading>
 
                             <Card className='bg-emerald-100' size='sm' variant="elevated">
-
                                 <HStack>
                                     <View style={styles.littleEventBar}>
-
                                     </View>
                                     <VStack>
                                         {todayEvents.length > 0 ? todayEvents.map(event => {
-                                            const time = moment(event.date).format("h:mm A");
-                                            return (<ThemedText key={event.type}>{event.type}: {event?.children_names?.join(', ')}  - {time}</ThemedText>)
+                                            const time = moment(event.date + "T" + event.time).format("h:mm A")
+                                            return (<ThemedText key={event.date}>{event.type} - {time}: {event?.children_names?.join(', ')}</ThemedText>)
                                         }) :
                                             <ThemedText>No Events Today!</ThemedText>
                                         }
                                     </VStack>
                                 </HStack>
-
                             </Card>
-
                         </VStack>
                     </Card>
                 </GridItem>
@@ -203,8 +199,8 @@ export default function HomeScreen() {
                 </Grid>
             </View>
         </ThemedView>
-    );
-};
+    )
+}
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -218,8 +214,8 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.green
     },
     upComingEventsContainer: {
-        height: 200,
-        marginTop: -60
+        height: 230,
+        marginTop: -50
     },
     cardNumber: {
         borderTopEndRadius: 0,
@@ -248,7 +244,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     upComingEventCard: {
-        height: 175,
+        height: '90%',
         marginBottom: 20,
         shadowColor: '#151515',
         shadowOpacity: 0.15,
@@ -277,4 +273,4 @@ const styles = StyleSheet.create({
         color: 'purple'
     },
 
-});
+})

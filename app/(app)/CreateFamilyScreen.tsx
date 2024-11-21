@@ -1,6 +1,6 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { UserSession, useSession } from '../AuthContext';
-import { VStack } from '@/components/ui/vstack';
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { UserSession, useSession } from '../AuthContext'
+import { VStack } from '@/components/ui/vstack'
 import {
     FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText,
     FormControlHelper,
@@ -15,8 +15,8 @@ import { Center } from '@/components/ui/center'
 import { Alert, SafeAreaView, StyleSheet } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { ThemedText } from '@/components/ThemedText'
-import { Colors } from '@/constants/Colors';
-import { HStack } from '@/components/ui/hstack';
+import { Colors } from '@/constants/Colors'
+import { HStack } from '@/components/ui/hstack'
 import {
     Select,
     SelectBackdrop,
@@ -25,12 +25,12 @@ import {
     SelectInput, SelectItem,
     SelectPortal,
     SelectTrigger
-} from '@/components/ui/select';
-import { AlertCircleIcon, ChevronDownIcon } from '@/components/ui/icon';
-import { ThemedView } from '@/components/ThemedView';
-import { router } from 'expo-router';
-import { supabase } from '@/lib/Supabase';
-import { setStorageItemAsync, useStorageState } from '@/app/UseStorageState';
+} from '@/components/ui/select'
+import { AlertCircleIcon, ChevronDownIcon } from '@/components/ui/icon'
+import { ThemedView } from '@/components/ThemedView'
+import { router } from 'expo-router'
+import { supabase } from '@/lib/Supabase'
+import { setStorageItemAsync, useStorageState } from '@/app/UseStorageState'
 
 interface Child {
     name: string,
@@ -40,48 +40,48 @@ interface Child {
 
 export default function CreateFamilyScreen() {
 
-    const ERROR_MESSAGE_TIMEOUT = 5000;
+    const ERROR_MESSAGE_TIMEOUT = 5000
 
 
-    const [errorMessage, setErrorMessage] = useState('');
-    const [isInvalid, setIsInvalid] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('')
+    const [isInvalid, setIsInvalid] = useState(false)
 
-    const [familyName, setFamilyName] = useState('');
-    const [childName, setChildName] = useState('');
-    const [childCreated, setChildCreated] = useState(false);
-    const [childBirthday, setChildBirthday] = useState(new Date(1980, 1, 1));
-    const [children, setChildren] = useState<Child[]>([]);
+    const [familyName, setFamilyName] = useState('')
+    const [childName, setChildName] = useState('')
+    const [childCreated, setChildCreated] = useState(false)
+    const [childBirthday, setChildBirthday] = useState(new Date(1980, 1, 1))
+    const [children, setChildren] = useState<Child[]>([])
     const [parentType, setParentType] = useState('')
 
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(false)
 
-    const [[isLoading, session], setSession] = useStorageState('session');
+    const [[isLoading, session], setSession] = useStorageState('session')
 
     useEffect(() => {
-        setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT);
-    }, [isInvalid, session]);
+        setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT)
+    }, [isInvalid, session])
 
     const onChange = (event: any, selectedDate: any) => {
-        const currentDate = new Date(selectedDate);
-        setShow(false);
-        setChildBirthday(currentDate);
+        const currentDate = new Date(selectedDate)
+        setShow(false)
+        setChildBirthday(currentDate)
         console.log(currentDate)
-    };
+    }
 
     const onFamilyNameChange = (name: string) => {
-        setFamilyName(name);
+        setFamilyName(name)
     }
 
     const onChildNameChange = (name: string) => {
-        setChildName(name);
+        setChildName(name)
     }
 
     const handleSelectChange = (value: string) => {
-        setParentType(value);
+        setParentType(value)
     }
 
     const handleAddChild = async () => {
-        const originalDate = new Date(1980, 1, 1);
+        const originalDate = new Date(1980, 1, 1)
 
         if (!childName) return Alert.alert('You must add a child name')
         if (childBirthday.getDate() === originalDate.getDate()) return Alert.alert('You must input a valid birthday')
@@ -92,23 +92,23 @@ export default function CreateFamilyScreen() {
         }
 
         if (children.some(({ name }) => name === newChild.name)) {
-            return Alert.alert(childName + ' Is already in your family');
+            return Alert.alert(childName + ' Is already in your family')
         }
 
         setChildren([...children, newChild])
         setChildName('')
         setChildBirthday(new Date(1980, 1, 1))
 
-        Alert.alert('Successfully added ' + childName + ' to your family');
+        Alert.alert('Successfully added ' + childName + ' to your family')
         return
     }
     const handleCreateFamily = async () => {
-        if (!familyName) return Alert.alert('You must provide a family name');
-        if (!parentType) return Alert.alert('You must select whether you are the father or the mother');
-        if (children.length < 1) return Alert.alert('You must add a child before creating your family');
+        if (!familyName) return Alert.alert('You must provide a family name')
+        if (!parentType) return Alert.alert('You must select whether you are the father or the mother')
+        if (children.length < 1) return Alert.alert('You must add a child before creating your family')
 
         // create family in database
-        const addedFamily = await addFamilyToDatabase();
+        const addedFamily = await addFamilyToDatabase()
         if (!addedFamily) return Alert.alert('There was an error')
         // success
         Alert.alert('family created')
@@ -116,38 +116,38 @@ export default function CreateFamilyScreen() {
     }
 
     const updateParentType = async () => {
-        if (!parentType) return Alert.alert('You must select whether you are the father or the mother');
+        if (!parentType) return Alert.alert('You must select whether you are the father or the mother')
 
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser()
         if (!user) return Alert.alert('Something went wrong. Please make sure you have internet connection.')
 
         const { error } = await supabase.from('parents').update({
             parent_type: parentType
-        }).eq('id', user.id).select();
+        }).eq('id', user.id).select()
 
-        console.log(error);
+        console.log(error)
 
         if (error) {
             setErrorMessage('There was an error. Please try again')
-            return false;
+            return false
         }
 
-        return true;
+        return true
     }
 
     const addFamilyToDatabase = async () => {
 
-        const updatedParentType = await updateParentType();
+        const updatedParentType = await updateParentType()
 
         if (!updatedParentType) Alert.alert('There was an error.')
 
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) return Alert.alert('Something went wrong. Please make sure you have internet connection.')
 
         const { data, error } = await supabase.from('families').insert([{
             name: familyName
-        }]).select().limit(1).single();
+        }]).select().limit(1).single()
 
         if (error) {
             setErrorMessage('There was an error creating your family. Please try again')
@@ -167,14 +167,14 @@ export default function CreateFamilyScreen() {
 
         // TODO: Set the session with the new family id
 
-        const oldSession: UserSession = JSON.parse(session ? session : '');
+        const oldSession: UserSession = JSON.parse(session ? session : '')
 
         const newSession = {
             userId: oldSession.userId,
             firstName: oldSession.firstName,
             familyId: data?.id
         }
-        console.log(newSession);
+        console.log(newSession)
         setSession(JSON.stringify(newSession))
 
         await addChildrenToDatabaseAndFamily(data)
@@ -185,10 +185,10 @@ export default function CreateFamilyScreen() {
 
         children.forEach(child => child.family_id = family.id)
 
-        const { data, error } = await supabase.from('children').insert(children).select();
+        const { data, error } = await supabase.from('children').insert(children).select()
         if (error) {
             console.log(error.message)
-            setErrorMessage('There was an error. Please try again');
+            setErrorMessage('There was an error. Please try again')
             return
         }
     }
@@ -334,7 +334,7 @@ export default function CreateFamilyScreen() {
                 </VStack>
             </Center>
         </KeyboardAwareScrollView>
-    );
+    )
 
 }
 
@@ -371,5 +371,5 @@ const styles = StyleSheet.create({
         marginTop: 3,
         marginLeft: -15
     }
-});
+})
 
