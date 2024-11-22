@@ -11,21 +11,13 @@ import { Text } from '@/components/ui/text'
 import { Grid, GridItem } from '@/components/ui/grid'
 import { VStack } from '@/components/ui/vstack'
 import { router } from 'expo-router'
-import { useStorageState } from '@/app/UseStorageState'
-import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar'
 import { ThemedText } from '@/components/ThemedText'
 import { supabase } from '@/lib/Supabase'
 import { useEffect, useState } from 'react'
 import moment from 'moment'
+import { TodayEvent } from '@/types'
 
 const CARD_SIZE = 'lg'
-
-interface TodayEvent {
-    type?: string
-    date?: string
-    time?: string,
-    children_names?: any[]
-}
 
 export default function HomeScreen() {
     const getDate = (count: number) => {
@@ -40,6 +32,8 @@ export default function HomeScreen() {
     const userSession = session ? JSON.parse(session) : {}
 
     useEffect(() => {
+        console.log(userSession);
+
         if (!session) return
         getTodaysEvent()
     }, [session])
@@ -51,16 +45,20 @@ export default function HomeScreen() {
 
     const getTodaysEvent = async () => {
 
-        const today = getDate(0).toISOString().split('T')[0]
+        const today = moment([]).format('YYYY-MM-DD h:mm a').split(' ')[0]
+        console.log(today);
 
-        const { data, error } = await supabase.from('events').select('type,date,time,children_names').eq('family_id', userSession.familyId)
+        const { data, error } = await supabase.from('events').select('type,date_time,children_names').eq('family_id', userSession.familyId)
             .eq('date', today)
 
         if (error) {
-            console.error(error.message)
+            console.log(error.message)
             return
         }
-        console.log(data)
+
+        if (!data) return
+
+
         setTodayEvents(data)
     }
 
@@ -112,8 +110,10 @@ export default function HomeScreen() {
                                     </View>
                                     <VStack>
                                         {todayEvents.length > 0 ? todayEvents.map(event => {
-                                            const time = moment(event.date + "T" + event.time).format("h:mm A")
-                                            return (<ThemedText key={event.date}>{event.type} - {time}: {event?.children_names?.join(', ')}</ThemedText>)
+                                            const time = moment(event.date_time).format("h:mm A")
+                                            console.log(event.date_time);
+
+                                            return (<ThemedText key={event.date_time ? event.date_time + Math.random() * 10425 : ''}>{event.type} - {time}: {event?.children_names?.join(', ')}</ThemedText>)
                                         }) :
                                             <ThemedText>No Events Today!</ThemedText>
                                         }

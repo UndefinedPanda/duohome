@@ -8,9 +8,17 @@ import { TouchableOpacity, View } from 'react-native'
 import { HStack } from '@/components/ui/hstack'
 import { Ionicons } from '@expo/vector-icons'
 import { useSession } from '@/app/AuthContext'
+import { useEffect } from 'react'
+import { UserSession } from '@/types'
 
 export default function TabLayout() {
-    const { logOut } = useSession()
+    const { logOut, session } = useSession()
+    const userSession: UserSession = session ? JSON.parse(session) : {}
+
+    useEffect(() => {
+        console.log(userSession);
+
+    }, [session])
 
     return (
         <GluestackUIProvider>
@@ -42,14 +50,20 @@ export default function TabLayout() {
                         headerRight: () => (
                             <TouchableOpacity onPress={() => logOut()} className='mr-3'>
                                 <HStack>
-                                    <Ionicons name="log-out-outline" size={32} color="white" />
+                                    <Ionicons name="log-out-outline" size={32} color="#C3423F" />
                                 </HStack>
                             </TouchableOpacity>
                         ),
-                        headerLeft: () => (
+                        headerLeft: () => userSession.familyId ? (
                             <TouchableOpacity onPress={() => router.push('/(app)/ViewFamilyScreen')} className='ml-3'>
                                 <HStack>
                                     <Ionicons name="people-outline" size={32} color="white" />
+                                </HStack>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity onPress={() => router.push('/(app)/CreateFamilyScreen')} className='ml-3'>
+                                <HStack>
+                                    <Ionicons name="person-add-outline" size={28} color="white" />
                                 </HStack>
                             </TouchableOpacity>
                         ),

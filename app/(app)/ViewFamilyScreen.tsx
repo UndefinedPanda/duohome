@@ -1,4 +1,4 @@
-import { UserSession, useSession } from '../AuthContext'
+import { useSession } from '../AuthContext'
 import { VStack } from '@/components/ui/vstack'
 import {
     FormControl, FormControlError, FormControlErrorText,
@@ -18,11 +18,8 @@ import { supabase } from '@/lib/Supabase'
 import { useStorageState } from '@/app/UseStorageState'
 import ViewFamilyChild from '@/components/ScreenHelpers/ViewFamilyChild'
 import { Spinner } from '@/components/ui/spinner'
+import { Child, UserSession } from '@/types'
 
-interface Child {
-    name: string,
-    birthday: string,
-}
 
 export default function CreateFamilyScreen() {
 
@@ -45,7 +42,7 @@ export default function CreateFamilyScreen() {
     const [isLoadingFamily, setIsLoadingFamily] = useState(true)
 
     const [[isLoading, session], setSession] = useStorageState('session')
-    const userSession = session ? JSON.parse(session) : {}
+    const userSession: UserSession = session ? JSON.parse(session) : {}
 
     useEffect(() => {
         setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT)
@@ -120,7 +117,7 @@ export default function CreateFamilyScreen() {
                     {isLoadingFamily ?
                         <Spinner size="large" color={Colors.light.green} />
                         :
-                        children.map((child) => (<ViewFamilyChild key={child.name} name={child.name} birthday={child.birthday} />))}
+                        children.map((child) => (<ViewFamilyChild key={child.name} name={child.name ? child.name : ''} birthday={child.birthday ? child.birthday : ''} />))}
 
                 </VStack>
             </Center>

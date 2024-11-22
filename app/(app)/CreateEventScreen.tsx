@@ -1,5 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { UserSession, useSession } from '../AuthContext'
+import { useSession } from '../AuthContext'
 import { VStack } from '@/components/ui/vstack'
 import {
     FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText,
@@ -30,13 +30,7 @@ import { supabase } from '@/lib/Supabase'
 import Button from '@/components/Button'
 import moment, { Moment } from 'moment'
 import { router } from 'expo-router'
-
-interface Child {
-    id: number,
-    name?: string,
-    family_id?: number | null,
-    birthday?: string,
-}
+import { Child, UserSession } from '@/types'
 
 export default function CreateEventScreen() {
 
@@ -61,6 +55,20 @@ export default function CreateEventScreen() {
         setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT)
         if (session) getChildren().then((data) => setChildren(data))
     }, [isInvalid, session])
+
+    useEffect(() => {
+
+
+        if (!userSession.familyId) {
+            Alert.alert('Must create a family!', 'You must create a family before creating events',
+                [
+                    { text: 'Go Back', onPress: () => router.replace('/(app)/(tabs)') },
+                    { text: 'Create Family', onPress: () => { router.replace('/(app)/CreateFamilyScreen') } },
+
+                ],
+            )
+        }
+    }, [])
 
     const onDateTimeChange = (event: any, selectedDate: any) => {
         setEventDate(selectedDate)
@@ -113,7 +121,7 @@ export default function CreateEventScreen() {
             names.push(data?.name)
         }
 
-        const date = eventDate.toISOString().split('T')[0]
+        const date = moment(eventDate).format('YYYY-MM-DD h:mm a').split(' ')[0]
         const time = eventDate.toISOString().split('T')[1]
 
         const { data, error } = await supabase.from('events').insert([
@@ -123,7 +131,7 @@ export default function CreateEventScreen() {
                 children_names: names,
                 type: eventType,
                 date,
-                time,
+                date_time: eventDate,
                 description,
                 marker_colour: markerColour
             }
@@ -142,6 +150,8 @@ export default function CreateEventScreen() {
         router.replace('/(app)/(tabs)')
 
     }
+
+
 
     return (
 
@@ -164,7 +174,7 @@ export default function CreateEventScreen() {
                         >
                             <VStack space="xl">
                                 {children.map(child => (
-                                    <Checkbox key={child.id} value={child.id.toString()}>
+                                    <Checkbox key={child.id} value={child.id ? child.id.toString() : ''}>
                                         <CheckboxIndicator>
                                             <CheckboxIcon color="#000" as={CheckIcon} />
                                         </CheckboxIndicator>
@@ -298,6 +308,7 @@ export default function CreateEventScreen() {
                                     value={eventDate}
                                     mode={'datetime'}
                                     onChange={onDateTimeChange}
+                                    timeZoneName='GMT-5'
                                 />
                             </FormControl>
                         </HStack>

@@ -1,10 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { UserSession, useSession } from '../AuthContext'
 import { VStack } from '@/components/ui/vstack'
 import {
     FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText,
-    FormControlHelper,
-    FormControlHelperText,
     FormControlLabel,
     FormControlLabelText
 } from '@/components/ui/form-control'
@@ -27,29 +24,24 @@ import {
     SelectTrigger
 } from '@/components/ui/select'
 import { AlertCircleIcon, ChevronDownIcon } from '@/components/ui/icon'
-import { ThemedView } from '@/components/ThemedView'
 import { router } from 'expo-router'
 import { supabase } from '@/lib/Supabase'
-import { setStorageItemAsync, useStorageState } from '@/app/UseStorageState'
-
-interface Child {
-    name: string,
-    family_id?: number | null,
-    birthday: string,
-}
+import { useStorageState } from '@/app/UseStorageState'
+import { Child, UserSession } from '@/types'
 
 export default function CreateFamilyScreen() {
 
     const ERROR_MESSAGE_TIMEOUT = 5000
 
-
     const [errorMessage, setErrorMessage] = useState('')
     const [isInvalid, setIsInvalid] = useState(false)
+
+    const [disabledButton, setDisabledButton] = useState(false);
 
     const [familyName, setFamilyName] = useState('')
     const [childName, setChildName] = useState('')
     const [childCreated, setChildCreated] = useState(false)
-    const [childBirthday, setChildBirthday] = useState(new Date(1980, 1, 1))
+    const [childBirthday, setChildBirthday] = useState(new Date())
     const [children, setChildren] = useState<Child[]>([])
     const [parentType, setParentType] = useState('')
 
@@ -81,10 +73,10 @@ export default function CreateFamilyScreen() {
     }
 
     const handleAddChild = async () => {
-        const originalDate = new Date(1980, 1, 1)
+        const originalDate = new Date()
 
         if (!childName) return Alert.alert('You must add a child name')
-        if (childBirthday.getDate() === originalDate.getDate()) return Alert.alert('You must input a valid birthday')
+        // if (childBirthday === originalDate) return Alert.alert('You must input a valid birthday')
 
         const newChild: Child = {
             name: childName,
@@ -97,12 +89,13 @@ export default function CreateFamilyScreen() {
 
         setChildren([...children, newChild])
         setChildName('')
-        setChildBirthday(new Date(1980, 1, 1))
+        setChildBirthday(new Date())
 
         Alert.alert('Successfully added ' + childName + ' to your family')
         return
     }
     const handleCreateFamily = async () => {
+        setDisabledButton(true);
         if (!familyName) return Alert.alert('You must provide a family name')
         if (!parentType) return Alert.alert('You must select whether you are the father or the mother')
         if (children.length < 1) return Alert.alert('You must add a child before creating your family')
@@ -324,7 +317,7 @@ export default function CreateFamilyScreen() {
                     {children.length > 0 ? (
                         <ButtonGroup>
                             <Button style={styles.createFamilyButton}
-                                disabled={false} className="w-full self-end mt-4"
+                                disabled={disabledButton} className="w-full self-end mt-4"
                                 size="xl"
                                 onPress={handleCreateFamily}>
                                 <ButtonText>Create Family</ButtonText>

@@ -2,27 +2,12 @@ import { useContext, createContext, type PropsWithChildren, useEffect } from 're
 import { useStorageState } from './UseStorageState'
 import { router } from 'expo-router'
 import { supabase } from '@/lib/Supabase'
+import { UserSession } from '@/types'
 
 // TODO: CLEAN UP THIS FILE -
 // TODO: CREATE ERROR TYPE AND RETURN THAT INSTEAD OF SHIT
 // TODO: REMOVE ALL FUNCTIONALITY FROM THE AUTH CONTEXT REGISTER AND LOGIN FUNCTIONS TO THEIR OWN SEPARATE METHOD FUNCTIONS
 
-type RegisterError = {
-    error: boolean
-    message: string
-}
-
-type UserPreferences = {}
-
-export type UserSession = {
-    userId: string
-    familyId?: number | undefined | null
-    firstName: string | undefined | null
-    lastName?: string | undefined | null
-    premiumUser?: boolean | undefined | null
-    premiumFamily?: boolean | undefined | null
-    userPreferences?: UserPreferences | undefined | null
-}
 
 const AuthContext = createContext<{
     register: (email: string, firstName: string, lastName: string, password: string) => any
@@ -57,7 +42,6 @@ export function SessionProvider({children}: PropsWithChildren) {
     const [[isLoading, session], setSession] = useStorageState('session')
 
     useEffect(() => {
-
     }, [session])
 
 

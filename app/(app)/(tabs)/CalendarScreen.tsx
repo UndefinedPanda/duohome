@@ -4,10 +4,12 @@ import { Calendar, CalendarUtils } from 'react-native-calendars'
 
 import CalendarKit, { EventItem } from '@howljs/calendar-kit'
 import { ThemedView } from '@/components/ThemedView'
-import { UserSession, useSession } from '@/app/AuthContext'
+import { useSession } from '@/app/AuthContext'
 import { supabase } from '@/lib/Supabase'
 import { Spinner } from '@/components/ui/spinner'
 import { Colors } from 'react-native/Libraries/NewAppScreen'
+import moment from 'moment'
+import { UserSession } from '@/types'
 
 const TODAYS_DATE = CalendarUtils.getCalendarDateString(new Date())
 
@@ -67,17 +69,17 @@ export default function CalendarScreen() {
 
         for (let i = 0; i < data.length; i++) {
 
-            const eventStart = new Date(data[i].date + 'T' + data[i].time);
+            const eventStart = new Date(data[i].date_time);
             const addedHour = 60 * 60 * 1000
             const eventEnd = new Date(eventStart.getTime() + addedHour)
 
-            console.log(eventStart.toISOString().split('.')[0]+'Z')
+            console.log('GETTING MOMENT DATE FROM DB AS ' + moment(data[i].date_time).format('YYYY-MM-DD h:mm a'))
 
             const event = {
                 id: data[i].id,
                 title: data[i].description,
-                start: { dateTime: eventStart.toISOString().split('.')[0]+'Z' },
-                end: { dateTime: eventEnd.toISOString().split('.')[0]+'Z' },
+                start: { dateTime: eventStart.toISOString().split('.')[0] + 'Z' },
+                end: { dateTime: eventEnd.toISOString().split('.')[0] + 'Z' },
                 color: data[i].marker_colour,
             }
 
@@ -89,6 +91,9 @@ export default function CalendarScreen() {
 
             const date = data[i].date
             const sameDates = []
+
+            console.log('THIS?!' + new Date(eventStart.toISOString().split('.')[0] + 'Z'));
+
 
             for (let j = 0; j < data.length; j++) {
                 if (data[i].id !== data[j].id && date === data[j].date) {
