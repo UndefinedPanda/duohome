@@ -1,5 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { useSession } from '../AuthContext'
+import { useSession } from '../../AuthContext'
 import { VStack } from '@/components/ui/vstack'
 import {
     FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText,
@@ -27,7 +27,7 @@ import { setStorageItemAsync, useStorageState } from '@/app/UseStorageState'
 import { Textarea, TextareaInput } from '@/components/ui/textarea'
 import { Checkbox, CheckboxGroup, CheckboxIcon, CheckboxIndicator, CheckboxLabel } from '@/components/ui/checkbox'
 import { supabase } from '@/lib/Supabase'
-import Button from '@/components/Button'
+import BlueButton from '@/components/custom/buttons/BlueButton'
 import moment, { Moment } from 'moment'
 import { router } from 'expo-router'
 import { Child, UserSession } from '@/types'
@@ -48,7 +48,7 @@ export default function CreateEventScreen() {
 
     const [children, setChildren] = useState<Child[]>([])
 
-    const { session } = useSession()
+    const [[isLoading, session], setSession] = useStorageState('session')
     const userSession: UserSession = session ? JSON.parse(session) : {}
 
     useEffect(() => {
@@ -57,13 +57,12 @@ export default function CreateEventScreen() {
     }, [isInvalid, session])
 
     useEffect(() => {
-
-
-        if (!userSession.familyId) {
+        
+        if (!isLoading && !userSession.familyId) {
             Alert.alert('Must create a family!', 'You must create a family before creating events',
                 [
                     { text: 'Go Back', onPress: () => router.replace('/(app)/(tabs)') },
-                    { text: 'Create Family', onPress: () => { router.replace('/(app)/CreateFamilyScreen') } },
+                    { text: 'Create Family', onPress: () => { router.replace('/(app)/screens/CreateFamilyScreen') } },
 
                 ],
             )
@@ -339,7 +338,7 @@ export default function CreateEventScreen() {
                         </FormControlError>
                     </FormControl>
 
-                    <Button text="Create Event" onPress={createEvent} />
+                    <BlueButton text="Create Event" onPress={createEvent} />
 
                 </VStack>
             </Center>

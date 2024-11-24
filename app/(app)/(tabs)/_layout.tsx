@@ -1,4 +1,4 @@
-import { Tabs, router } from 'expo-router'
+import { Tabs, router, useNavigation } from 'expo-router'
 import { TabBarIcon } from '@/components/navigation/TabBarIcon'
 import { Colors } from '@/constants/Colors'
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
@@ -8,17 +8,54 @@ import { TouchableOpacity, View } from 'react-native'
 import { HStack } from '@/components/ui/hstack'
 import { Ionicons } from '@expo/vector-icons'
 import { useSession } from '@/app/AuthContext'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { UserSession } from '@/types'
+import { supabase } from '@/lib/Supabase'
+import { useStorageState } from '@/app/UseStorageState'
 
 export default function TabLayout() {
-    const { logOut, session } = useSession()
-    const userSession: UserSession = session ? JSON.parse(session) : {}
+
+    const navigation = useNavigation()
+
+    const { logOut } = useSession()
+    const [[isLoading, session], setSession] = useStorageState('session')
+
+    const [userSession, setUserSession] = useState(session ? JSON.parse(session) : {})
+
+    const [hasNotification, setHasNotification] = useState<boolean>(false);
 
     useEffect(() => {
-        console.log(userSession);
+        if (userSession) {
+            checkNotifications()
+        }
+    }, [])
 
+    useEffect(() => {
+        const unsubscribe = navigation.addListener("focus", () => {
+
+            checkNotifications()
+        });
+
+        return unsubscribe;
+    }, [navigation])
+
+    useEffect(() => {
+        setUserSession(session ? JSON.parse(session) : {})
     }, [session])
+
+    const checkNotifications = async () => {
+        const userEmail = (await supabase.auth.getUser()).data.user?.email
+
+        const { data, error } = await supabase.from('family_invite').select('*').eq('invited_parent_email', userEmail).eq('declined', false).eq('accepted', false)
+
+        if (error) {
+            console.error(error.message)
+            return
+        }
+
+        if (data.length === 0) setHasNotification(false)
+        if (data.length > 0) setHasNotification(true)
+    }
 
     return (
         <GluestackUIProvider>
@@ -48,20 +85,27 @@ export default function TabLayout() {
                         headerTitle: ``,
                         headerStatusBarHeight: 50,
                         headerRight: () => (
-                            <TouchableOpacity onPress={() => logOut()} className='mr-3'>
-                                <HStack>
-                                    <Ionicons name="log-out-outline" size={32} color="#C3423F" />
-                                </HStack>
-                            </TouchableOpacity>
+                            <HStack>
+                                {hasNotification ? (<TouchableOpacity onPress={() => router.push('/(app)/screens/NotificationsScreen')} className='mr-3'>
+                                    <HStack>
+                                        <Ionicons name="notifications" size={34} color="orange" />
+                                    </HStack>
+                                </TouchableOpacity>) : ''}
+                                <TouchableOpacity onPress={() => logOut()} className='mr-3'>
+                                    <HStack>
+                                        <Ionicons name="log-out-outline" size={34} color="white" />
+                                    </HStack>
+                                </TouchableOpacity>
+                            </HStack>
                         ),
                         headerLeft: () => userSession.familyId ? (
-                            <TouchableOpacity onPress={() => router.push('/(app)/ViewFamilyScreen')} className='ml-3'>
+                            <TouchableOpacity onPress={() => router.push('/(app)/screens/ViewFamilyScreen')} className='ml-3'>
                                 <HStack>
                                     <Ionicons name="people-outline" size={32} color="white" />
                                 </HStack>
                             </TouchableOpacity>
                         ) : (
-                            <TouchableOpacity onPress={() => router.push('/(app)/CreateFamilyScreen')} className='ml-3'>
+                            <TouchableOpacity onPress={() => router.push('/(app)/screens/CreateFamilyScreen')} className='ml-3'>
                                 <HStack>
                                     <Ionicons name="person-add-outline" size={28} color="white" />
                                 </HStack>
@@ -80,7 +124,7 @@ export default function TabLayout() {
                         headerTitle: '',
                         headerStatusBarHeight: 50,
                         headerRight: () => (
-                            <TouchableOpacity onPress={() => router.push('/(app)/CreateEventScreen')} className='mr-5 p-2'>
+                            <TouchableOpacity onPress={() => router.push('/(app)/screens/CreateEventScreen')} className='mr-5 p-2'>
                                 <HStack>
                                     <Icon size='xl' as={AddIcon} color='#fff' />
                                     <Text className='ml-2 text-white'>

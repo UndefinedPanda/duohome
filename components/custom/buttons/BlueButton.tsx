@@ -2,7 +2,7 @@ import React from 'react'
 import { Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native'
 import { Colors } from '@/constants/Colors'
 
-export default function Button(props: any) {
+export default function BlueButton(props: any) {
     const {onPress, text} = props
     return (
         <TouchableOpacity style={ styles.button } onPress={ onPress }>
@@ -14,12 +14,13 @@ export default function Button(props: any) {
 const styles = StyleSheet.create({
     button: {
         alignItems: 'center',
+        width:'100%',
         justifyContent: 'center',
         paddingVertical: 12,
         paddingHorizontal: 32,
         borderRadius: 4,
         elevation: 3,
-        backgroundColor: Colors.light.green
+        backgroundColor: Colors.light.blue
     },
     text: {
         fontSize: 16,

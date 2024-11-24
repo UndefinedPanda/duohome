@@ -8,6 +8,12 @@ export type Child = {
     family_id?: number | null,
     birthday?: string,
 }
+
+export type ChildProps = {
+    name: string
+    birthday: string,
+}
+
 export type UserPreferences = {}
 
 export type UserSession = {
@@ -25,4 +31,16 @@ export type TodayEvent = {
     date_time?: string
     time?: string,
     children_names?: any[]
+}
+
+export type FamilyInvite = {
+    family_id?: number,
+    inviting_parent?: string,
+    invited_parent?: string,
+    invited_parent_email?: string,
+    accepted?: boolean,
+    declined?: boolean,
+    families?: {
+        name?: string,
+    }
 }

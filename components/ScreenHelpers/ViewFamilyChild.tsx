@@ -6,11 +6,9 @@ import { HStack } from "../ui/hstack"
 import { Input, InputField } from "../ui/input"
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { StyleSheet } from "react-native"
+import { ChildProps } from "@/types"
 
-type ChildProps = {
-    name: string
-    birthday: string,
-}
+
 
 export default function ViewFamilyChild(props: ChildProps) {
 
@@ -30,7 +28,7 @@ export default function ViewFamilyChild(props: ChildProps) {
                 <FormControlLabel>
                     <FormControlLabelText>Child Name</FormControlLabelText>
                 </FormControlLabel>
-                <Input className="my-1 border-black" size="xl">
+                <Input isDisabled className="my-1 border-black" size="xl">
                     <InputField
                         type="text"
                         // placeholder="Joe"
@@ -58,6 +56,7 @@ export default function ViewFamilyChild(props: ChildProps) {
                             <FormControlLabelText>Child Birthday</FormControlLabelText>
                         </FormControlLabel>
                         <DateTimePicker
+                            disabled
                             style={styles.datePicker}
                             testID="dateTimePicker"
                             value={new Date(childBirthday)}

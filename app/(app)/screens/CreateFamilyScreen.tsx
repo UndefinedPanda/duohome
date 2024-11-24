@@ -169,6 +169,7 @@ export default function CreateFamilyScreen() {
         }
         console.log(newSession)
         setSession(JSON.stringify(newSession))
+        console.log(session)
 
         await addChildrenToDatabaseAndFamily(data)
         return true

@@ -13,6 +13,7 @@ Todos:
         ✔ Add events into timeline (time, descripton, etc) @done(24-11-22 11:47)
         X Fix and reorganize components folder
         X Add 'end time' to events. default will be one hour, users can select this when creating the event
+        X Add more information about the event on the timeline
         X Fix interfaces. Make specific file for them instead of randomly everywhere
         X Fix the session so im only using useSession instead of the janky useSession parsing im doing
         X Allow parents to invite their coparent on the 'View Family' screen
@@ -35,3 +36,5 @@ Todos:
 
 
 
+
+Archive:

@@ -35,7 +35,7 @@ export default function AppLayout() {
                             backgroundColor: '#fff'
                         },
                     }} />
-                    <Stack.Screen name="CreateFamilyScreen" options={{
+                    <Stack.Screen name="screens/CreateFamilyScreen" options={{
                         headerShown: true,
                         headerTitle: 'Create Your Family',
                         headerTintColor: '#fff',
@@ -47,20 +47,20 @@ export default function AppLayout() {
                             backgroundColor: '#fff'
                         },
                     }} />
-                    <Stack.Screen name="ViewFamilyScreen" options={{
+                    <Stack.Screen name="screens/ViewFamilyScreen" options={{
                         contentStyle: {
                             backgroundColor: '#fff'
                         },
                         headerTintColor: '#fff',
                         headerBackTitle: 'Back',
                         headerShown: true,
-                        headerTitle: 'View Your Family',
+                        headerTitle: 'Manage Your Family',
                         headerStyle: {
                             backgroundColor: Colors.light.green
                         }
                     }} />
 
-                    <Stack.Screen name="CreateEventScreen" options={{
+                    <Stack.Screen name="screens/CreateEventScreen" options={{
                         headerShown: true,
                         headerTitle: 'Create Your Event',
                         headerTintColor: '#fff',
@@ -72,7 +72,18 @@ export default function AppLayout() {
                             backgroundColor: '#fff'
                         },
                     }} />
-
+                    <Stack.Screen name="screens/NotificationsScreen" options={{
+                        headerShown: true,
+                        headerTitle: 'Notifications',
+                        headerTintColor: '#fff',
+                        headerBackTitle: 'Back',
+                        headerStyle: {
+                            backgroundColor: Colors.light.green
+                        },
+                        contentStyle: {
+                            backgroundColor: '#fff'
+                        },
+                    }} />
                 </Stack>
             </SessionProvider>
         </GluestackUIProvider>

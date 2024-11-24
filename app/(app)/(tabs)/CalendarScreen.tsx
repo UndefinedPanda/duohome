@@ -73,8 +73,6 @@ export default function CalendarScreen() {
             const addedHour = 60 * 60 * 1000
             const eventEnd = new Date(eventStart.getTime() + addedHour)
 
-            console.log('GETTING MOMENT DATE FROM DB AS ' + moment(data[i].date_time).format('YYYY-MM-DD h:mm a'))
-
             const event = {
                 id: data[i].id,
                 title: data[i].description,
@@ -91,9 +89,6 @@ export default function CalendarScreen() {
 
             const date = data[i].date
             const sameDates = []
-
-            console.log('THIS?!' + new Date(eventStart.toISOString().split('.')[0] + 'Z'));
-
 
             for (let j = 0; j < data.length; j++) {
                 if (data[i].id !== data[j].id && date === data[j].date) {

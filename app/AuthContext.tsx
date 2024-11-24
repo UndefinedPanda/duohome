@@ -37,7 +37,7 @@ export function useSession() {
     return value
 }
 
-export function SessionProvider({children}: PropsWithChildren) {
+export function SessionProvider({ children }: PropsWithChildren) {
 
     const [[isLoading, session], setSession] = useStorageState('session')
 
@@ -46,7 +46,7 @@ export function SessionProvider({children}: PropsWithChildren) {
 
 
     const registerUser = async (email: string, password: string, firstName: string) => {
-        const {error} = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
             email, password, options: {
                 data: {
                     first_name: firstName
@@ -56,27 +56,27 @@ export function SessionProvider({children}: PropsWithChildren) {
 
         if (error) {
             console.log(error.message)
-            return {registered: false, errorMessage: error.message}
+            return { registered: false, errorMessage: error.message }
         }
 
-        return {registered: true, errorMessage: ''}
+        return { registered: true, errorMessage: '' }
     }
 
     const loginUser = async (email: string, password: string) => {
-        const {data: {user}, error} = await supabase.auth.signInWithPassword({email, password})
+        const { data: { user }, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) {
             console.log(error.message)
-            return {loggedIn: false, errorMessage: error.message}
+            return { loggedIn: false, errorMessage: error.message }
         }
 
         const userInformation = await getUserInformation(user)
 
         if (userInformation.error) {
             console.log(userInformation.errorMessage)
-            return {loggedIn: false, errorMessage: userInformation.errorMessage}
+            return { loggedIn: false, errorMessage: userInformation.errorMessage }
         }
 
-        return {user, loggedIn: true, errorMessage: ''}
+        return { user, loggedIn: true, errorMessage: '' }
     }
 
     const getUserInformation = async (user: any) => {
@@ -113,9 +113,12 @@ export function SessionProvider({children}: PropsWithChildren) {
 
     return (
         <AuthContext.Provider
-            value={ {
+            value={{
                 register: async (email, firstName, lastName, password) => {
-                    const {registered, errorMessage} = await registerUser(email, password, firstName)
+
+                    const lowerCaseEmail = email.toLowerCase()
+
+                    const { registered, errorMessage } = await registerUser(lowerCaseEmail, password, firstName)
 
                     if (!registered) {
                         return {
@@ -124,8 +127,8 @@ export function SessionProvider({children}: PropsWithChildren) {
                         }
                     }
 
-                    const {data, error} = await supabase.from('parents').insert([{
-                        email, first_name: firstName, last_name: lastName
+                    const { data, error } = await supabase.from('parents').insert([{
+                        email: lowerCaseEmail, first_name: firstName, last_name: lastName
                     }]).select().limit(1).single()
 
                     if (error) {
@@ -150,14 +153,14 @@ export function SessionProvider({children}: PropsWithChildren) {
                     }
                 },
                 login: async (email: string, password: string) => {
-                    const {user, loggedIn, errorMessage} = await loginUser(email, password)
-                    if (!loggedIn) return {loggedIn, errorMessage}
+                    const { user, loggedIn, errorMessage } = await loginUser(email, password)
+                    if (!loggedIn) return { loggedIn, errorMessage }
                     if (!user) return {
                         loggedIn: false,
                         errorMessage: 'There was an error logging you in. Try again later.'
                     }
 
-                    return {loggedIn, errorMessage: ''}
+                    return { loggedIn, errorMessage: '' }
                 },
                 logOut: () => {
                     setSession(null)
@@ -165,8 +168,8 @@ export function SessionProvider({children}: PropsWithChildren) {
                 },
                 session,
                 isLoading
-            } }>
-            { children }
+            }}>
+            {children}
         </AuthContext.Provider>
     )
 }

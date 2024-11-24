@@ -1,7 +1,5 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
-import { Button, ButtonText } from '@/components/ui/button'
 import { useSession } from '@/app/AuthContext'
-import { CalendarUtils } from 'react-native-calendars'
 import { Colors } from '../../../constants/Colors'
 import { ThemedView } from '@/components/ThemedView'
 import { HStack } from '@/components/ui/hstack'
@@ -32,21 +30,13 @@ export default function HomeScreen() {
     const userSession = session ? JSON.parse(session) : {}
 
     useEffect(() => {
-        console.log(userSession);
-
         if (!session) return
         getTodaysEvent()
     }, [session])
 
-
-    const openCreateFamilyScreen = () => {
-        router.push('/CreateFamilyScreen')
-    }
-
     const getTodaysEvent = async () => {
 
         const today = moment([]).format('YYYY-MM-DD h:mm a').split(' ')[0]
-        console.log(today);
 
         const { data, error } = await supabase.from('events').select('type,date_time,children_names').eq('family_id', userSession.familyId)
             .eq('date', today)
@@ -68,26 +58,7 @@ export default function HomeScreen() {
             <Grid style={styles.headerContainer} _extra={{
                 className: 'grid-cols-12'
             }}>
-                {/* <GridItem _extra={{
-                    className: 'col-span-8'
-                }}>
-                    <VStack className='flex '>
-                        <Button className="mt-4 bg-red-500 rounded-lg" size="xl" onPress={logOut}>
-                            <ButtonText>Logout</ButtonText>
-                        </Button>
-                        {userSession?.familyId ?
-                            <Button className="mt-4 bg-cyan-950 rounded-lg" size="xl"
-                                onPress={openViewFamilyScreen}>
-                                <ButtonText>View Family</ButtonText>
-                            </Button>
-                            :
-                            <Button className="mt-4 bg-cyan-950 rounded-lg" size="xl"
-                                onPress={openCreateFamilyScreen}>
-                                <ButtonText>Create Family</ButtonText>
-                            </Button>
-                        }
-                    </VStack>
-                </GridItem> */}
+               
             </Grid>
             <Grid style={styles.upComingEventsContainer} _extra={{
                 className: 'grid-cols-8'
@@ -111,8 +82,6 @@ export default function HomeScreen() {
                                     <VStack>
                                         {todayEvents.length > 0 ? todayEvents.map(event => {
                                             const time = moment(event.date_time).format("h:mm A")
-                                            console.log(event.date_time);
-
                                             return (<ThemedText key={event.date_time ? event.date_time + Math.random() * 10425 : ''}>{event.type} - {time}: {event?.children_names?.join(', ')}</ThemedText>)
                                         }) :
                                             <ThemedText>No Events Today!</ThemedText>
