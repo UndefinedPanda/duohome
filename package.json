@@ -12,6 +12,7 @@
     "lint": "expo lint",
     "postinstall": "patch-package"
   },
+  "overrides": { "@react-aria/utils": "3.27.0" },
   "jest": {
     "preset": "jest-expo"
   },

@@ -80,7 +80,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
     }
 
     const getUserInformation = async (user: any) => {
-
         // get family
         const {
             data: family_parent,

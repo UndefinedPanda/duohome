@@ -36,7 +36,6 @@ export default function CreateEventScreen() {
 
     const ERROR_MESSAGE_TIMEOUT = 5000
 
-
     const [isInvalid, setIsInvalid] = useState<boolean>(false)
 
     const [selectedChildren, setSelectedChildren] = useState<string[]>([])
@@ -149,8 +148,6 @@ export default function CreateEventScreen() {
         router.replace('/(app)/(tabs)')
 
     }
-
-
 
     return (
 
@@ -307,7 +304,7 @@ export default function CreateEventScreen() {
                                     value={eventDate}
                                     mode={'datetime'}
                                     onChange={onDateTimeChange}
-                                    timeZoneName='GMT-5'
+                                    timeZoneName={Intl.DateTimeFormat().resolvedOptions().timeZone}
                                 />
                             </FormControl>
                         </HStack>
