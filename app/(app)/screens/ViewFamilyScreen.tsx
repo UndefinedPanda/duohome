@@ -48,7 +48,6 @@ export default function ViewFamilyScreen() {
     const userSession: UserSession = session ? JSON.parse(session) : {}
 
     useEffect(() => {
-        if (!isLoading) checkCoParent()
     }, [])
 
     useEffect(() => {
@@ -57,8 +56,7 @@ export default function ViewFamilyScreen() {
         if (!isLoading) {
             getFamilyFromDatabase().then(() => setIsLoadingFamily(false))
         }
-
-
+        checkCoParent()
     }, [isInvalid, session])
 
     const checkCoParent = async () => {
@@ -67,12 +65,13 @@ export default function ViewFamilyScreen() {
 
         const { data, error } = await supabase.from('family_parent').select('parent_id').eq('family_id', userSession.familyId)
         if (error) {
-            console.error(error)
+            console.log(error)
             return
         }
 
         if (!data) return
         if (data.length > 1) setHasCoParent(true)
+        console.log(hasCoParent)
     }
 
     const getFamilyFromDatabase = async () => {
@@ -141,7 +140,7 @@ export default function ViewFamilyScreen() {
 
         if (!familyInvite) return
 
-        Alert.alert('Send a famly invite to your co parent. Once they accept, they will be able to view the family calendar, as well as add their own events related to your children. Parents may not remove or update the other parents events without submitting a event change request')
+        Alert.alert('Sent a famly invite to your co parent. Once they accept, they will be able to view the family calendar, as well as add their own events related to your children. Parents may not remove or update the other parents events without submitting a event change request')
 
         setHasCoParent(true)
 

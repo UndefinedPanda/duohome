@@ -19,7 +19,7 @@ export default function TabLayout() {
 
     const { logOut } = useSession()
     const [[isLoading, session], setSession] = useStorageState('session')
-
+    const [familyId, setFamilyId] = useState()
     const [userSession, setUserSession] = useState(session ? JSON.parse(session) : {})
 
     const [hasNotification, setHasNotification] = useState<boolean>(false);
@@ -27,12 +27,13 @@ export default function TabLayout() {
     useEffect(() => {
         if (userSession) {
             checkNotifications()
+            checkFamilyId()
         }
     }, [])
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", () => {
-
+            checkFamilyId()
             checkNotifications()
         });
 
@@ -56,6 +57,19 @@ export default function TabLayout() {
         if (data.length === 0) setHasNotification(false)
         if (data.length > 0) setHasNotification(true)
     }
+
+    const checkFamilyId = async () => {
+        const userId = (await supabase.auth.getUser()).data.user?.id
+        const { data, error } = await supabase.from('family_parent').select('family_id').eq('parent_id', userId)
+
+        if (error) {
+            console.log(error)
+            return
+        }
+        setFamilyId(data[0].family_id)
+    }
+
+    console.log(userSession)
 
     return (
         <GluestackUIProvider>
@@ -98,7 +112,7 @@ export default function TabLayout() {
                                 </TouchableOpacity>
                             </HStack>
                         ),
-                        headerLeft: () => userSession.familyId ? (
+                        headerLeft: () => familyId ? (
                             <TouchableOpacity onPress={() => router.push('/(app)/screens/ViewFamilyScreen')} className='ml-3'>
                                 <HStack>
                                     <Ionicons name="people-outline" size={32} color="white" />

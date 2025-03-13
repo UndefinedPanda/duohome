@@ -11,14 +11,14 @@ import { HStack } from "@/components/ui/hstack"
 import { VStack } from "@/components/ui/vstack"
 import { Grid, GridItem } from "@/components/ui/grid"
 import RedButton from "@/components/custom/buttons/RedButton"
-import { FamilyInvite } from "@/types"
-
+import { FamilyInvite, UserSession } from "@/types"
+import { useStorageState } from "@/app/UseStorageState"
 
 
 export default function NotificationsScreen() {
 
     const [familyInvites, setFamilyInvites] = useState<FamilyInvite[]>([])
-
+    const [[isLoading, session], setSession] = useStorageState('session')
 
     useEffect(() => {
         checkFamilyInvites().then((data) => setFamilyInvites(data ? data : []))
@@ -28,7 +28,10 @@ export default function NotificationsScreen() {
     const checkFamilyInvites = async () => {
         const userEmail = (await supabase.auth.getUser()).data.user?.email
 
-        const { data, error } = await supabase.from('family_invite').select('*, families (name)').eq('invited_parent_email', userEmail).eq('accepted', false).eq('declined', false).limit(1)
+        const {
+            data,
+            error
+        } = await supabase.from('family_invite').select('*, families (name)').eq('invited_parent_email', userEmail).eq('accepted', false).eq('declined', false).limit(1)
 
         if (error) {
             console.error(error.message)
@@ -42,7 +45,10 @@ export default function NotificationsScreen() {
     const handleDeclineInvite = async () => {
         const userEmail = (await supabase.auth.getUser()).data.user?.email
 
-        const { data, error } = await supabase.from('family_invite').update({ declined: true }).eq('invited_parent_email', userEmail).select()
+        const {
+            data,
+            error
+        } = await supabase.from('family_invite').update({ declined: true }).eq('invited_parent_email', userEmail).select()
 
         if (error) {
             console.log(error.message)
@@ -55,6 +61,47 @@ export default function NotificationsScreen() {
         setFamilyInvites([])
     }
 
+    const handleAcceptInvite = async () => {
+        const userEmail = (await supabase.auth.getUser()).data.user?.email
+
+        const {
+            data,
+            error
+        } = await supabase.from('family_invite').update({ accepted: true }).eq('invited_parent_email', userEmail).select()
+
+        if (error) {
+            console.log(error.message)
+            Alert.alert('There was an error accepting this invite. Please try again')
+            return
+        }
+        if (!data) return
+
+        const addedParent = await supabase.from('family_parent').insert([{
+            family_id: data[0].family_id,
+            parent_id: data[0].invited_parent,
+            coparent: true,
+        }]).select();
+
+        if (addedParent.error) {
+            console.error(addedParent.error.message)
+            Alert.alert('There was an error adding this user to the family. Please try again.')
+            return
+        }
+        const oldSession: UserSession = JSON.parse(session ? session : '')
+
+        const newSession = {
+            userId: oldSession.userId,
+            firstName: oldSession.firstName,
+            familyId: data[0]?.family_id
+        }
+        setSession(JSON.stringify(newSession))
+
+        console.log(newSession);
+
+        Alert.alert('You have accepted this invite')
+        setFamilyInvites([])
+    }
+
     return (
         <ThemedView style={styles.container}>
             {familyInvites.length > 0 ? (
@@ -62,7 +109,8 @@ export default function NotificationsScreen() {
                     <Heading size="xl" className="mb-1">
                         New Family Invite
                     </Heading>
-                    <ThemedText>You've been invited to join the {familyInvites[0].families?.name ? familyInvites[0].families.name : ''}</ThemedText>
+                    <ThemedText>You've been invited to join
+                        the {familyInvites[0].families?.name ? familyInvites[0].families.name : ''}</ThemedText>
                     <Grid
                         className="gap-5"
                         _extra={{
@@ -72,7 +120,7 @@ export default function NotificationsScreen() {
                             className: "col-span-6"
                         }}>
                             <ButtonGroup className='my-3 mt-3'>
-                                <BlueButton text='Accept' />
+                                <BlueButton text='Accept' onPress={handleAcceptInvite} />
                             </ButtonGroup>
                         </GridItem>
                         <GridItem _extra={{
