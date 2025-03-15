@@ -29,10 +29,10 @@ import { Checkbox, CheckboxGroup, CheckboxIcon, CheckboxIndicator, CheckboxLabel
 import { supabase } from '@/lib/Supabase'
 import BlueButton from '@/components/custom/buttons/BlueButton'
 import moment, { Moment } from 'moment'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { Child, UserSession } from '@/types'
 
-export default function CreateEventScreen() {
+export default function EditEventScreen() {
 
     const ERROR_MESSAGE_TIMEOUT = 5000
 
@@ -50,23 +50,27 @@ export default function CreateEventScreen() {
     const [[isLoading, session], setSession] = useStorageState('session')
     const userSession: UserSession = session ? JSON.parse(session) : {}
 
+    const { eventId } = useLocalSearchParams()
+    const [selectedEvent, setSelectedEvent] = useState<any[]>();
+
     useEffect(() => {
         setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT)
-        if (session) getChildren().then((data) => setChildren(data))
+        if (session) {
+            getChildren().then((data) => setChildren(data))
+            getSelectedEvent().then((data) => setSelectedEvent(data))
+        }
+
+
     }, [isInvalid, session])
 
     useEffect(() => {
-        
-        if (session && !userSession.familyId) {
-            Alert.alert('Must create a family!', 'You must create a family before creating events',
-                [
-                    { text: 'Go Back', onPress: () => router.replace('/(app)/(tabs)') },
-                    { text: 'Create Family', onPress: () => { router.replace('/(app)/screens/CreateFamilyScreen') } },
+        if (!selectedEvent) return
+        setEventType(selectedEvent[0].type)
+        setDescription(selectedEvent[0].description)
+        setEventDate(new Date(selectedEvent[0].date_time))
+        console.log(selectedEvent)
+    }, [selectedEvent, eventType])
 
-                ],
-            )
-        }
-    }, [])
 
     const onDateTimeChange = (event: any, selectedDate: any) => {
         setEventDate(selectedDate)
@@ -79,7 +83,20 @@ export default function CreateEventScreen() {
             console.log(error.message)
             return []
         }
+
         return data
+    }
+
+    const getSelectedEvent = async () => {
+        // TODO: send back to main screen or handle this accordingly
+        if (!eventId) return;
+        const { data, error } = await supabase.from('events').select('*').eq('id', eventId)
+        if (error) {
+            console.log(error.message)
+            return []
+        }
+        return data
+
     }
 
     const createEvent = async () => {
@@ -186,10 +203,10 @@ export default function CreateEventScreen() {
                     <FormControl className="mb-4" size="lg" isInvalid={isInvalid}>
                         <FormControlLabel>
                             <FormControlLabelText>
-                                Type
+                                Current Event Type ({eventType})
                             </FormControlLabelText>
                         </FormControlLabel>
-                        <Select onValueChange={(value) => setEventType(value)}>
+                        <Select onValueChange={(value) => setEventType(value)} >
                             <SelectTrigger className="border-black">
                                 <SelectInput placeholder="Please Choose One" />
                                 <SelectIcon className="mr-3" as={ChevronDownIcon} />
@@ -240,7 +257,7 @@ export default function CreateEventScreen() {
                                 Marker Colour
                             </FormControlLabelText>
                         </FormControlLabel>
-                        <Select onValueChange={(value) => setMarkerColour(value)}>
+                        <Select onValueChange={(value) => setMarkerColour(value)} >
                             <SelectTrigger className="border-black">
                                 <SelectInput placeholder="Please Choose One" />
                                 <SelectIcon className="mr-3" as={ChevronDownIcon} />
@@ -321,7 +338,7 @@ export default function CreateEventScreen() {
                             isInvalid={false}
                             isDisabled={false}
                         >
-                            <TextareaInput placeholder="Add a description..." onChangeText={(text) => setDescription(text)} />
+                            <TextareaInput defaultValue={description} placeholder="Add a description..." onChangeText={(text) => setDescription(text)} />
                         </Textarea>
                         <FormControlError>
                             {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}

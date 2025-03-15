@@ -72,6 +72,18 @@ export default function AppLayout() {
                             backgroundColor: '#fff'
                         },
                     }} />
+                     <Stack.Screen name="screens/EditEventScreen" options={{
+                        headerShown: true,
+                        headerTitle: 'Edit Selected Event',
+                        headerTintColor: '#fff',
+                        headerBackTitle: 'Back',
+                        headerStyle: {
+                            backgroundColor: Colors.light.green
+                        },
+                        contentStyle: {
+                            backgroundColor: '#fff'
+                        },
+                    }} />
                     <Stack.Screen name="screens/NotificationsScreen" options={{
                         headerShown: true,
                         headerTitle: 'Notifications',

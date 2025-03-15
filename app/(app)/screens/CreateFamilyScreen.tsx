@@ -57,7 +57,6 @@ export default function CreateFamilyScreen() {
         const currentDate = new Date(selectedDate)
         setShow(false)
         setChildBirthday(currentDate)
-        console.log(currentDate)
     }
 
     const onFamilyNameChange = (name: string) => {
@@ -104,7 +103,7 @@ export default function CreateFamilyScreen() {
         const addedFamily = await addFamilyToDatabase()
         if (!addedFamily) return Alert.alert('There was an error')
         // success
-        Alert.alert('family created')
+        Alert.alert('Successfully created your Family')
         router.replace('/(app)/(tabs)')
     }
 
@@ -117,8 +116,6 @@ export default function CreateFamilyScreen() {
         const { error } = await supabase.from('parents').update({
             parent_type: parentType
         }).eq('id', user.id).select()
-
-        console.log(error)
 
         if (error) {
             setErrorMessage('There was an error. Please try again')
@@ -167,9 +164,7 @@ export default function CreateFamilyScreen() {
             firstName: oldSession.firstName,
             familyId: data?.id
         }
-        console.log(newSession)
         setSession(JSON.stringify(newSession))
-        console.log(session)
 
         await addChildrenToDatabaseAndFamily(data)
         return true

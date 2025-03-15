@@ -63,6 +63,7 @@ export default function NotificationsScreen() {
 
     const handleAcceptInvite = async () => {
         const userEmail = (await supabase.auth.getUser()).data.user?.email
+        const userId = (await supabase.auth.getUser()).data.user?.id
 
         const {
             data,
@@ -75,6 +76,14 @@ export default function NotificationsScreen() {
             return
         }
         if (!data) return
+
+        const deletedFamilyParent = await supabase.from('family_parent').delete().eq('parent_id', userId)
+
+        if (deletedFamilyParent.error) {
+            console.error(deletedFamilyParent.error);
+            Alert.alert('There was an error. Please try again.')
+            return
+        }
 
         const addedParent = await supabase.from('family_parent').insert([{
             family_id: data[0].family_id,
@@ -95,8 +104,6 @@ export default function NotificationsScreen() {
             familyId: data[0]?.family_id
         }
         setSession(JSON.stringify(newSession))
-
-        console.log(newSession);
 
         Alert.alert('You have accepted this invite')
         setFamilyInvites([])

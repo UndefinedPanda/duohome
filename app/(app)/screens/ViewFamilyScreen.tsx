@@ -71,7 +71,6 @@ export default function ViewFamilyScreen() {
 
         if (!data) return
         if (data.length > 1) setHasCoParent(true)
-        console.log(hasCoParent)
     }
 
     const getFamilyFromDatabase = async () => {
@@ -91,7 +90,6 @@ export default function ViewFamilyScreen() {
         const currentDate = new Date(selectedDate)
         setShow(false)
         setChildBirthday(currentDate)
-        console.log(currentDate)
     }
 
     const onFamilyNameChange = (name: string) => {
@@ -102,8 +100,6 @@ export default function ViewFamilyScreen() {
     }
 
     const inviteCoParent = async () => {
-        console.log(coParentEmailAddress);
-
         const { data, error } = await supabase.from('parents').select('id,email').eq('email', coParentEmailAddress.toLowerCase()).limit(1)
         if (error) {
             console.error(error.message)
