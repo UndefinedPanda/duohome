@@ -96,6 +96,18 @@ export default function AppLayout() {
                             backgroundColor: '#fff'
                         },
                     }} />
+                    <Stack.Screen name="screens/MessagesScreen" options={{
+                        headerShown: true,
+                        headerTitle: 'Messages',
+                        headerTintColor: '#fff',
+                        headerBackTitle: 'Back',
+                        headerStyle: {
+                            backgroundColor: Colors.light.green
+                        },
+                        contentStyle: {
+                            backgroundColor: '#fff'
+                        },
+                    }} />
                 </Stack>
             </SessionProvider>
         </GluestackUIProvider>

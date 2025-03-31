@@ -100,7 +100,7 @@ export default function CalendarScreen() {
                 checkedDates.push(date);
             }
 
-            const dots = [{ key: data[i].type, color: data[i].marker_colour }]
+            const dots = [{ key: data[i].id, color: data[i].marker_colour }]
             sameDates.forEach(date => dots.push({ key: date.type, color: date.marker_colour }))
             preparedMarkedDates[date] = {
                 dots,

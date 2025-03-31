@@ -13,6 +13,7 @@ import { supabase } from '@/lib/Supabase'
 import { useEffect, useState } from 'react'
 import moment from 'moment'
 import { TodayEvent } from '@/types'
+import { router } from 'expo-router'
 
 const CARD_SIZE = 'lg'
 
@@ -102,7 +103,9 @@ export default function HomeScreen() {
                         <Heading style={styles.heading} size="xl" className="mx-3">
                             Messages
                         </Heading>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={ () => {
+                            router.push('/(app)/screens/MessagesScreen')
+                        }}>
                             <HStack className='mr-3' style={{ width: '85%' }}>
                                 <Card style={styles.cardNumber} size='md' className="ml-3 mt-3">
                                     <Heading size='xl'>0</Heading>

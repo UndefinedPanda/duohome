@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/form-control'
 import React, { useEffect, useState } from 'react'
 import { Center } from '@/components/ui/center'
-import { Alert, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native'
+import { Alert, SafeAreaView, StyleSheet, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { ThemedText } from '@/components/ThemedText'
 import { Colors } from '@/constants/Colors'
@@ -32,6 +32,8 @@ import moment, { Moment } from 'moment'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Child, UserSession } from '@/types'
 
+import ntc from '../../../lib/ntc'
+
 export default function EditEventScreen() {
 
     const ERROR_MESSAGE_TIMEOUT = 5000
@@ -42,6 +44,7 @@ export default function EditEventScreen() {
 
     const [eventType, setEventType] = useState<string>('')
     const [markerColour, setMarkerColour] = useState<string>('')
+    const [markerColourName, setMarkerColourName] = useState<string>('')
     const [eventDate, setEventDate] = useState<Date>(new Date())
     const [description, setDescription] = useState<string>('')
 
@@ -52,24 +55,35 @@ export default function EditEventScreen() {
 
     const { eventId } = useLocalSearchParams()
     const [selectedEvent, setSelectedEvent] = useState<any[]>();
+    const [selectedEventChildren, setSelectedEventChildren] = useState<any[]>()
+
+    const [createdByParentName, setCreatedByParentName] = useState<string>('')
+    const [createdByParentId, setCreatedByParentId] = useState<string>('')
 
     useEffect(() => {
+        // TODO: Add loading icon
+        if (isLoading) console.log('loading')
         setTimeout(() => setIsInvalid(false), ERROR_MESSAGE_TIMEOUT)
         if (session) {
             getChildren().then((data) => setChildren(data))
             getSelectedEvent().then((data) => setSelectedEvent(data))
         }
 
+        console.log(selectedEvent)
 
     }, [isInvalid, session])
 
     useEffect(() => {
         if (!selectedEvent) return
+
         setEventType(selectedEvent[0].type)
         setDescription(selectedEvent[0].description)
         setEventDate(new Date(selectedEvent[0].date_time))
-        console.log(selectedEvent)
-    }, [selectedEvent, eventType])
+        const markerColourName = ntc.name(`${selectedEvent[0].marker_colour}`)
+        setMarkerColour(selectedEvent[0].marker_colour)
+        setMarkerColourName(markerColourName[1].toString())
+        setCreatedByParentId(selectedEvent[0].parent_id)
+    }, [selectedEvent])
 
 
     const onDateTimeChange = (event: any, selectedDate: any) => {
@@ -95,20 +109,35 @@ export default function EditEventScreen() {
             console.log(error.message)
             return []
         }
+        setSelectedEventChildren(data[0].children_names)
+
+        const createdByWhichParent = await supabase.from('parents').select('first_name').eq('id', data[0].parent_id)
+        if (createdByWhichParent.error) {
+            console.log(createdByWhichParent.error.message)
+            return []
+        }
+        const parentFirstName: string = createdByWhichParent.data[0].first_name
+
+        setCreatedByParentName(parentFirstName.charAt(0).toUpperCase() + parentFirstName.slice(1))
         return data
 
     }
 
-    const createEvent = async () => {
+    const editEvent = async () => {
+
+        if (!selectedEvent) {
+            Alert.alert('Theres no selected Event. Please try again.')
+            return
+        }
+
+        if(createdByParentId !== userSession.userId) {
+            Alert.alert('You cannot change events that your co parent has created. Please Request a change')
+            return
+        }
 
         const originalDate = new Date()
 
         let names = []
-
-        if (selectedChildren.length < 1) {
-            Alert.alert('Must select at least one child')
-            return
-        }
 
         if (!eventType) {
             Alert.alert('Must select an event / appointment type')
@@ -139,25 +168,25 @@ export default function EditEventScreen() {
         const date = moment(eventDate).format('YYYY-MM-DD h:mm a').split(' ')[0]
         const time = eventDate.toISOString().split('T')[1]
 
-        const { data, error } = await supabase.from('events').insert([
+        console.log(markerColour)
+        console.log(eventType)
+
+        const { data, error } = await supabase.from('events').update([
             {
-                parent_id: userSession.userId,
-                family_id: userSession.familyId,
-                children_names: names,
                 type: eventType,
                 date,
                 date_time: eventDate,
                 description,
                 marker_colour: markerColour
             }
-        ]).select()
+        ]).eq('id', selectedEvent[0].id).select()
 
         if (error) {
-            Alert.alert('There was an error creating this event. Please try again')
+            Alert.alert('There was an error updating this event. Please try again')
             return
         }
 
-        Alert.alert('Successfully Created This Event!!')
+        Alert.alert('Successfully updated this event')
 
         router.replace('/(app)/(tabs)')
 
@@ -168,29 +197,33 @@ export default function EditEventScreen() {
         <KeyboardAwareScrollView>
             <Center style={styles.container}>
                 <VStack className="w-full px-4">
+                    <ThemedText style={styles.createdByText}>Created By {createdByParentName} </ThemedText>
                     <FormControl className="mb-4" size="lg" isInvalid={isInvalid}>
                         <FormControlLabel>
                             <FormControlLabelText>
-                                Who's this event for?
+                                This Event Is For
                             </FormControlLabelText>
                         </FormControlLabel>
-                        <CheckboxGroup
+                        <CheckboxGroup isDisabled
                             value={selectedChildren}
-
                             onChange={(keys) => {
                                 setSelectedChildren(keys)
                             }}
                         >
                             <VStack space="xl">
-                                {children.map(child => (
-                                    <Checkbox key={child.id} value={child.id ? child.id.toString() : ''}>
-                                        <CheckboxIndicator>
-                                            <CheckboxIcon color="#000" as={CheckIcon} />
-                                        </CheckboxIndicator>
-                                        <CheckboxLabel>{child.name}</CheckboxLabel>
-                                    </Checkbox>
-                                ))}
+                                {children.map((child, index) => {
+                                    if (selectedEventChildren?.includes(child.name)) {
+                                        return (
 
+                                            <Checkbox key={child.id} value={child.id ? child.id.toString() : ''} isChecked={selectedEventChildren?.includes(child.name)}>
+                                                <CheckboxIndicator>
+                                                    <CheckboxIcon color="#000" as={CheckIcon} />
+                                                </CheckboxIndicator>
+                                                <CheckboxLabel>{child.name}</CheckboxLabel>
+                                            </Checkbox>
+                                        )
+                                    }
+                                })}
                             </VStack>
                         </CheckboxGroup>
                         <FormControlError>
@@ -199,14 +232,16 @@ export default function EditEventScreen() {
                         </FormControlError>
                     </FormControl>
 
-
                     <FormControl className="mb-4" size="lg" isInvalid={isInvalid}>
                         <FormControlLabel>
                             <FormControlLabelText>
-                                Current Event Type ({eventType})
+                                Event Type
                             </FormControlLabelText>
                         </FormControlLabel>
-                        <Select onValueChange={(value) => setEventType(value)} >
+                        <Select onValueChange={(value) => {
+                            setEventType(value)
+                            console.log(value)
+                        }}  >
                             <SelectTrigger className="border-black">
                                 <SelectInput placeholder="Please Choose One" />
                                 <SelectIcon className="mr-3" as={ChevronDownIcon} />
@@ -257,7 +292,7 @@ export default function EditEventScreen() {
                                 Marker Colour
                             </FormControlLabelText>
                         </FormControlLabel>
-                        <Select onValueChange={(value) => setMarkerColour(value)} >
+                        <Select onValueChange={(value) => setMarkerColour(value)} defaultValue={markerColourName} initialLabel={markerColourName} >
                             <SelectTrigger className="border-black">
                                 <SelectInput placeholder="Please Choose One" />
                                 <SelectIcon className="mr-3" as={ChevronDownIcon} />
@@ -338,7 +373,7 @@ export default function EditEventScreen() {
                             isInvalid={false}
                             isDisabled={false}
                         >
-                            <TextareaInput defaultValue={description} placeholder="Add a description..." onChangeText={(text) => setDescription(text)} />
+                            <TextareaInput defaultValue={description} onChangeText={(text) => setDescription(text)} />
                         </Textarea>
                         <FormControlError>
                             {/*<FormControlErrorIcon as={AlertCircleIcon}/>*/}
@@ -348,7 +383,7 @@ export default function EditEventScreen() {
                         </FormControlError>
                     </FormControl>
 
-                    <BlueButton text="Create Event" onPress={createEvent} />
+                    <BlueButton text="Edit Event" onPress={editEvent} />
 
                 </VStack>
             </Center>
@@ -392,6 +427,11 @@ const styles = StyleSheet.create({
     datePicker: {
         marginTop: 3,
         marginLeft: -15
+    },
+    createdByText: {
+        paddingTop: 20,
+        marginBottom: 10,
+        fontSize: 25
     }
 })
 
